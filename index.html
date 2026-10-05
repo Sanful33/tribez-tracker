@@ -41,10 +41,10 @@
         }
         .tab {
             flex: 1;
-            min-width: 80px;
-            padding: 10px 5px;
+            min-width: 65px;
+            padding: 10px 4px;
             text-align: center;
-            font-size: 0.75em;
+            font-size: 0.68em;
             font-weight: 600;
             color: #666;
             border-bottom: 3px solid transparent;
@@ -53,7 +53,6 @@
             white-space: nowrap;
         }
         .tab.active { color: #2e7d32; border-bottom-color: #2e7d32; background: #f1f8e9; }
-        .tab:hover { background: #f5f5f5; }
 
         /* Sections */
         .section { display: none; padding: 15px; }
@@ -92,13 +91,13 @@
         .stat-purple .number { color: #6a1b9a; }
 
         /* Progress Bar */
-        .progress-container { margin: 15px 0; }
         .progress-bar {
             background: #e0e0e0;
             border-radius: 10px;
             height: 20px;
             overflow: hidden;
             position: relative;
+            margin: 8px 0;
         }
         .progress-fill {
             height: 100%;
@@ -117,11 +116,6 @@
         }
 
         /* Island Progress */
-        .island-progress {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 8px;
-        }
         .island-row {
             display: flex;
             align-items: center;
@@ -129,9 +123,10 @@
             background: white;
             padding: 10px 12px;
             border-radius: 8px;
+            margin-bottom: 6px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.06);
         }
-        .island-name { font-size: 0.75em; font-weight: 600; min-width: 120px; }
+        .island-name { font-size: 0.72em; font-weight: 600; min-width: 110px; }
         .island-bar { flex: 1; background: #e0e0e0; border-radius: 6px; height: 12px; overflow: hidden; }
         .island-fill { height: 100%; border-radius: 6px; background: #43a047; transition: width 0.5s; }
         .island-pct { font-size: 0.7em; font-weight: 600; min-width: 40px; text-align: right; }
@@ -169,6 +164,7 @@
             margin-top: 8px;
             display: flex;
             gap: 6px;
+            flex-wrap: wrap;
         }
         .status-btn {
             padding: 4px 10px;
@@ -183,10 +179,8 @@
         .btn-pending { background: #e3f2fd; color: #1565c0; }
         .btn-remove { background: #fce4ec; color: #c62828; }
 
-        /* Inventory */
-        .resource-category {
-            margin-bottom: 20px;
-        }
+        /* Resource / Inventory items */
+        .resource-category { margin-bottom: 20px; }
         .category-header {
             font-size: 0.85em;
             font-weight: 700;
@@ -212,6 +206,7 @@
             flex: 1;
         }
         .resource-name small { color: #999; font-weight: 400; }
+        .resource-info { font-size: 0.68em; color: #888; }
         .resource-qty {
             display: flex;
             align-items: center;
@@ -260,7 +255,54 @@
         .needed-values .need { color: #e65100; }
         .needed-values .missing { color: #c62828; font-weight: 700; }
 
-        /* Add Mission Form */
+        /* Building Cards */
+        .building-card {
+            background: white;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+        .building-header {
+            padding: 12px 15px;
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .building-header h3 { font-size: 0.9em; color: #1b5e20; margin: 0; }
+        .building-header .tag {
+            font-size: 0.6em;
+            padding: 2px 8px;
+            border-radius: 10px;
+            background: white;
+            color: #2e7d32;
+            font-weight: 600;
+        }
+        .building-body { padding: 12px 15px; display: none; }
+        .building-body.open { display: block; }
+        .building-body p { font-size: 0.75em; color: #555; margin-bottom: 6px; }
+        .building-body table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.68em;
+            margin: 8px 0;
+        }
+        .building-body th {
+            background: #f5f5f5;
+            padding: 5px 4px;
+            text-align: center;
+            font-weight: 600;
+            border-bottom: 2px solid #ddd;
+        }
+        .building-body td {
+            padding: 4px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+        }
+
+        /* Forms */
         .add-form {
             background: white;
             border-radius: 12px;
@@ -339,7 +381,7 @@
             background: white;
         }
 
-        /* Upload Section */
+        /* Upload */
         .upload-area {
             border: 2px dashed #ccc;
             border-radius: 12px;
@@ -351,7 +393,6 @@
         }
         .upload-area:hover { border-color: #2e7d32; background: #f1f8e9; }
         .upload-area p { font-size: 0.8em; color: #666; }
-        .upload-area .icon { font-size: 2em; margin-bottom: 10px; }
 
         /* Bottom Nav */
         .bottom-nav {
@@ -372,51 +413,11 @@
             transition: all 0.3s;
         }
         .nav-item .icon { font-size: 1.2em; }
-        .nav-item .label { font-size: 0.6em; color: #888; }
+        .nav-item .label { font-size: 0.55em; color: #888; }
         .nav-item.active .icon { color: #2e7d32; }
         .nav-item.active .label { color: #2e7d32; font-weight: 600; }
 
-        /* Badges */
-        .badge {
-            display: inline-block;
-            padding: 2px 6px;
-            border-radius: 8px;
-            font-size: 0.6em;
-            font-weight: 700;
-        }
-        .badge-active { background: #fff3e0; color: #e65100; }
-        .badge-done { background: #e8f5e9; color: #2e7d32; }
-
-        /* Empty State */
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: #999;
-        }
-        .empty-state .icon { font-size: 3em; margin-bottom: 10px; }
-        .empty-state p { font-size: 0.85em; }
-
-        /* Section Title */
-        .section-title {
-            font-size: 0.9em;
-            font-weight: 700;
-            color: #333;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        /* Toggle */
-        .toggle-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 0;
-        }
-        .toggle-label { font-size: 0.8em; }
-
-        /* Resource need summary */
+        /* Need summary */
         .need-summary {
             background: linear-gradient(135deg, #fff3e0, #ffe0b2);
             border-radius: 12px;
@@ -424,6 +425,21 @@
             margin-bottom: 15px;
         }
         .need-summary h3 { font-size: 0.85em; color: #e65100; margin-bottom: 8px; }
+
+        .section-title {
+            font-size: 0.9em;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 12px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+        .empty-state .icon { font-size: 3em; margin-bottom: 10px; }
+        .empty-state p { font-size: 0.85em; }
     </style>
 </head>
 <body>
@@ -434,8 +450,9 @@
 </header>
 
 <div class="tabs">
-    <div class="tab active" onclick="showSection('dashboard')">📊 Dashboard</div>
+    <div class="tab active" onclick="showSection('dashboard')">📊 Panel</div>
     <div class="tab" onclick="showSection('missions')">📋 Misiones</div>
+    <div class="tab" onclick="showSection('resources')">📦 Recursos</div>
     <div class="tab" onclick="showSection('inventory')">💎 Inventario</div>
     <div class="tab" onclick="showSection('needed')">🔍 Necesitas</div>
     <div class="tab" onclick="showSection('buildings')">🏭 Edificios</div>
@@ -462,37 +479,28 @@
             <div class="label">❌ RECURSOS FALTAN</div>
         </div>
     </div>
-
     <div class="card">
         <h3>📈 Progreso General</h3>
-        <div class="progress-container">
-            <div class="progress-bar">
-                <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
-                <div class="progress-text" id="progress-text">0%</div>
-            </div>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+            <div class="progress-text" id="progress-text">0%</div>
         </div>
     </div>
-
     <div class="card">
         <h3>⚡ Misiones Activas Ahora</h3>
         <div id="dashboard-active-list">
-            <div class="empty-state">
-                <p>No hay misiones activas. Ve a 📋 Misiones para añadir.</p>
-            </div>
+            <div class="empty-state"><p>No hay misiones activas.</p></div>
         </div>
     </div>
-
     <div class="card">
         <h3>🏝️ Progreso por Isla</h3>
-        <div class="island-progress" id="island-progress"></div>
+        <div id="island-progress"></div>
     </div>
 </div>
 
 <!-- ==================== MISIONES ==================== -->
 <div id="missions" class="section">
     <div class="section-title">📋 Gestión de Misiones</div>
-
-    <!-- Add Mission Form -->
     <div class="add-form" id="add-mission-form">
         <div class="form-group">
             <label>Nombre de la misión</label>
@@ -524,72 +532,70 @@
             <label>Recompensas</label>
             <input type="text" id="mission-rewards" placeholder="Ej: Gold 50, Experience 40">
         </div>
-        <button class="btn-primary" onclick="addMission()">➕ Añadir Misión Activa</button>
+        <button class="btn-primary" onclick="addMission()">➕ Añadir Misión</button>
     </div>
-
-    <!-- Filters -->
     <div class="filters">
-        <div class="filter-btn active" onclick="filterMissions('all', this)">Todas</div>
-        <div class="filter-btn" onclick="filterMissions('active', this)">⚡ Activas</div>
-        <div class="filter-btn" onclick="filterMissions('done', this)">✅ Hechas</div>
-        <div class="filter-btn" onclick="filterMissions('pending', this)">⏳ Pendientes</div>
+        <div class="filter-btn active" onclick="filterMissions('all',this)">Todas</div>
+        <div class="filter-btn" onclick="filterMissions('active',this)">⚡ Activas</div>
+        <div class="filter-btn" onclick="filterMissions('done',this)">✅ Hechas</div>
+        <div class="filter-btn" onclick="filterMissions('pending',this)">⏳ Pendientes</div>
     </div>
-
     <input type="text" class="search-box" placeholder="🔍 Buscar misión..." oninput="searchMissions(this.value)">
-
     <div id="mission-list"></div>
+</div>
+
+<!-- ==================== RECURSOS (Catálogo) ==================== -->
+<div id="resources" class="section">
+    <div class="section-title">📦 Catálogo de Recursos</div>
+    <p style="font-size:0.75em;color:#666;margin-bottom:12px;">Todos los recursos del juego organizados por categoría (mismo orden que Inventario)</p>
+    <input type="text" class="search-box" placeholder="🔍 Buscar recurso..." oninput="searchResourcesCatalog(this.value)">
+    <div id="resources-catalog-list"></div>
 </div>
 
 <!-- ==================== INVENTARIO ==================== -->
 <div id="inventory" class="section">
-    <div class="section-title">💎 Mi Inventario de Recursos</div>
-    <input type="text" class="search-box" placeholder="🔍 Buscar recurso..." oninput="searchResources(this.value)">
+    <div class="section-title">💎 Mi Inventario</div>
+    <p style="font-size:0.75em;color:#666;margin-bottom:12px;">Introduce las cantidades que tienes de cada recurso</p>
+    <input type="text" class="search-box" placeholder="🔍 Buscar recurso..." oninput="searchInventory(this.value)">
     <div id="inventory-list"></div>
 </div>
 
 <!-- ==================== NECESITAS ==================== -->
 <div id="needed" class="section">
     <div class="section-title">🔍 Recursos que Necesitas</div>
-    <p style="font-size:0.75em; color:#666; margin-bottom:12px;">
-        Basado en tus misiones activas vs tu inventario actual
-    </p>
-
+    <p style="font-size:0.75em;color:#666;margin-bottom:12px;">Basado en tus misiones activas vs tu inventario</p>
     <div class="need-summary" id="need-summary">
         <h3>📊 Resumen</h3>
-        <p style="font-size:0.8em;" id="need-summary-text">Añade misiones activas para ver qué recursos necesitas.</p>
+        <p style="font-size:0.8em;" id="need-summary-text">Añade misiones activas para ver qué necesitas.</p>
     </div>
-
     <div id="needed-list"></div>
 </div>
 
 <!-- ==================== EDIFICIOS ==================== -->
 <div id="buildings" class="section">
-    <div class="section-title">🏭 Edificios e Industrias</div>
-    <input type="text" class="search-box" placeholder="🔍 Buscar edificio..." oninput="searchBuildings(this.value)">
-    <div id="building-list"></div>
+    <div class="section-title">🏭 Edificios</div>
+    <div class="filters" id="building-filters">
+        <div class="filter-btn active" onclick="filterBuildings('all',this)">Todos</div>
+        <div class="filter-btn" onclick="filterBuildings('production',this)">⚒️ Producción</div>
+        <div class="filter-btn" onclick="filterBuildings('social',this)">🎭 Social</div>
+        <div class="filter-btn" onclick="filterBuildings('special',this)">⭐ Especial</div>
+    </div>
+    <input type="text" class="search-box" placeholder="🔍 Buscar edificio..." oninput="searchBuildingsDB(this.value)">
+    <div id="buildings-db-list"></div>
 </div>
 
 <!-- ==================== CARGAR ==================== -->
 <div id="upload" class="section">
     <div class="section-title">📤 Cargar Datos</div>
-
     <div class="upload-area" onclick="document.getElementById('file-input').click()">
-        <div class="icon">📁</div>
+        <div style="font-size:2em;">📁</div>
         <p>Toca para subir tu Excel<br><strong>misiones the tribez.xlsx</strong></p>
         <input type="file" id="file-input" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleFileUpload(this)">
     </div>
-
-    <div class="card">
-        <h3>ℹ️ Formato esperado</h3>
-        <p><strong>Hoja "Misiones":</strong> title, requeriments, Rewards, Status, Island</p>
-        <p><strong>Hoja "Industrias":</strong> Edificio, Nivel, Tipo, Recursos producidos</p>
-        <p><strong>Hoja "Recursos":</strong> Nombre español, Nombre inglés</p>
-    </div>
-
     <div class="card">
         <h3>💾 Datos Guardados</h3>
         <p id="data-status">Los datos se guardan automáticamente en tu navegador.</p>
-        <button class="btn-secondary" onclick="exportData()">📥 Exportar datos (JSON)</button>
+        <button class="btn-secondary" onclick="exportData()">📥 Exportar backup (JSON)</button>
         <button class="btn-secondary" onclick="if(confirm('¿Borrar TODOS los datos?')){localStorage.clear();location.reload();}">🗑️ Borrar todo</button>
     </div>
 </div>
@@ -597,527 +603,206 @@
 <!-- Bottom Nav -->
 <div class="bottom-nav">
     <div class="nav-item active" onclick="showSection('dashboard')">
-        <div class="icon">📊</div>
-        <div class="label">Dashboard</div>
+        <div class="icon">📊</div><div class="label">Panel</div>
     </div>
     <div class="nav-item" onclick="showSection('missions')">
-        <div class="icon">📋</div>
-        <div class="label">Misiones</div>
+        <div class="icon">📋</div><div class="label">Misiones</div>
+    </div>
+    <div class="nav-item" onclick="showSection('resources')">
+        <div class="icon">📦</div><div class="label">Recursos</div>
     </div>
     <div class="nav-item" onclick="showSection('inventory')">
-        <div class="icon">💎</div>
-        <div class="label">Inventario</div>
-    </div>
-    <div class="nav-item" onclick="showSection('needed')">
-        <div class="icon">🔍</div>
-        <div class="label">Necesitas</div>
+        <div class="icon">💎</div><div class="label">Inventario</div>
     </div>
     <div class="nav-item" onclick="showSection('buildings')">
-        <div class="icon">🏭</div>
-        <div class="label">Edificios</div>
+        <div class="icon">🏭</div><div class="label">Edificios</div>
+    </div>
+    <div class="nav-item" onclick="showSection('needed')">
+        <div class="icon">🔍</div><div class="label">Necesitas</div>
     </div>
 </div>
 
 <script>
 // ==================== DATA ====================
-const ISLANDS = {
-    'IA': {name: 'Isla de los Ancestros', emoji: '🏝️'},
-    'MF': {name: 'Fiordo de Mármol', emoji: '🏔️'},
-    'MS': {name: 'Costa Misteriosa', emoji: '🌊'},
-    'AA': {name: 'Atolón de los Ancestros', emoji: '🐚'},
-    'MI': {name: 'Isla Murlod', emoji: '🌋'},
-    'AS': {name: 'Costa Alienígena', emoji: '👽'},
-    'PL': {name: 'Tierras de Piamonte', emoji: '⛰️'},
-    'FB': {name: 'Bahía del Granjero', emoji: '🌾'},
-    'CB': {name: 'Cala del Pescador', emoji: '🐟'}
+var ISLANDS = {
+    'IA': {name:'Isla de los Ancestros', emoji:'🏝️'},
+    'MF': {name:'Fiordo de Mármol', emoji:'🏔️'},
+    'MS': {name:'Costa Misteriosa', emoji:'🌊'},
+    'AA': {name:'Atolón de los Ancestros', emoji:'🐚'},
+    'MI': {name:'Isla Murlod', emoji:'🌋'},
+    'AS': {name:'Costa Alienígena', emoji:'👽'},
+    'PL': {name:'Tierras de Piamonte', emoji:'⛰️'},
+    'FB': {name:'Bahía del Granjero', emoji:'🌾'},
+    'CB': {name:'Cala del Pescador', emoji:'🐟'}
 };
 
-const RESOURCES_DB = {
-    basic: [
-        {en: 'Food', es: 'Comida'}, {en: 'Wood', es: 'Madera'}, {en: 'Stone', es: 'Piedra'},
-        {en: 'Lumber', es: 'Madera aserrada'}, {en: 'Cut Stone', es: 'Piedra cortada'},
-        {en: 'Marble', es: 'Mármol'}, {en: 'Sand', es: 'Arena'},
-        {en: 'Cut Marble', es: 'Mármol cortado'}, {en: 'Coral', es: 'Coral'},
-        {en: 'Glass', es: 'Cristal'}, {en: 'Copper', es: 'Cobre'}, {en: 'Paint', es: 'Pintura'}
-    ],
-    added: [
-        {en: 'Starclay', es: 'Arcilla estelar'}, {en: 'Fabric', es: 'Tela'},
-        {en: 'Wool', es: 'Lana'}, {en: 'Coal', es: 'Carbón'},
-        {en: 'Polunarium', es: 'Polunario'}, {en: 'Moon Graphite', es: 'Grafito lunar'},
-        {en: 'Lava Glass', es: 'Cristal de lava'}, {en: 'Sun Tile', es: 'Baldosa solar'},
-        {en: 'Frozen Rainbow', es: 'Arcoíris congelado'}, {en: 'Runestone', es: 'Piedra rúnica'},
-        {en: 'Nacre', es: 'Nácar'}, {en: 'Eternal Ice', es: 'Hielo eterno'},
-        {en: 'Jewel', es: 'Joya'}
-    ],
-    inventory: [
-        {en: "Dino's Egg", es: 'Huevo de dino'}, {en: 'Amber', es: 'Ámbar'},
-        {en: 'Ostrich Egg', es: 'Huevo de avestruz'}, {en: 'Trout', es: 'Trucha'},
-        {en: 'Juice', es: 'Zumo'}, {en: 'Silkworm', es: 'Gusano de seda'},
-        {en: 'Silk', es: 'Seda'}, {en: 'Milk', es: 'Leche'},
-        {en: 'Mystical Dust', es: 'Polvo místico'}, {en: 'Farming Kit', es: 'Kit de granja'},
-        {en: 'Fishing Kit', es: 'Kit de pesca'}, {en: 'Seeds', es: 'Semillas'},
-        {en: 'Dressing', es: 'Abono'}, {en: 'Badge', es: 'Insignia'},
-        {en: 'Rainbow Shaving', es: 'Virutas de arcoíris'},
-        {en: 'Crystalline Glass', es: 'Cristal cristalino'},
-        {en: 'Mercury', es: 'Mercurio'}, {en: 'Magnet', es: 'Imán'},
-        {en: 'Treble Clef', es: 'Clave de sol'}
-    ],
-    competition: [
-        {en: 'Ice Key', es: 'Llave de hielo'}, {en: 'Fire Key', es: 'Llave de fuego'},
-        {en: 'Flower Key', es: 'Llave de flores'}, {en: 'Sea Key', es: 'Llave del mar'},
-        {en: 'Snowflake', es: 'Copo de nieve'}, {en: 'Ice Sphere', es: 'Esfera de hielo'},
-        {en: 'Spark', es: 'Chispa'}, {en: 'Magma Ball', es: 'Bola de magma'},
-        {en: 'Clover', es: 'Trébol'}, {en: 'Rose', es: 'Rosa'},
-        {en: 'Starfish', es: 'Estrella de mar'}, {en: 'Seashell', es: 'Concha'}
-    ],
-    gold: [
-        {en: 'Gold', es: 'Oro'}, {en: 'Gems', es: 'Gemas'},
-        {en: 'Experience', es: 'Experiencia'}
-    ]
+// Resources in SAME order for both Catalog and Inventory
+var RESOURCES_DB = {
+    basic: {
+        name: '🪨 Recursos Básicos (12)',
+        items: [
+            {en:'Food',es:'Comida',source:'Parcela, Granja de cerdos, Molino'},
+            {en:'Wood',es:'Madera',source:'Cabaña del Leñador'},
+            {en:'Stone',es:'Piedra',source:'Cantera'},
+            {en:'Lumber',es:'Madera aserrada',source:'Serrería'},
+            {en:'Cut Stone',es:'Piedra cortada',source:'Fábrica de piedra'},
+            {en:'Marble',es:'Mármol',source:'Cantera de mármol'},
+            {en:'Sand',es:'Arena',source:'Arenero (Costa Misteriosa)'},
+            {en:'Cut Marble',es:'Mármol cortado',source:'Fábrica de mármol'},
+            {en:'Coral',es:'Coral',source:'Minería de coral (Atolón)'},
+            {en:'Glass',es:'Cristal',source:'Laboratorio'},
+            {en:'Copper',es:'Cobre',source:'Fundición'},
+            {en:'Paint',es:'Pintura',source:'Fábrica de pintura'}
+        ]
+    },
+    added: {
+        name: '✨ Recursos Añadidos (13)',
+        items: [
+            {en:'Starclay',es:'Arcilla estelar',source:'Fábrica de arcilla estelar'},
+            {en:'Fabric',es:'Tela',source:'Hilandería (Bahía Granjero)'},
+            {en:'Wool',es:'Lana',source:'Granja de ovejas (Bahía Granjero)'},
+            {en:'Coal',es:'Carbón',source:'Taller de carbón'},
+            {en:'Polunarium',es:'Polunario',source:'Fundición de polunario (Piamonte)'},
+            {en:'Moon Graphite',es:'Grafito lunar',source:'Prensa lunar'},
+            {en:'Lava Glass',es:'Cristal de lava',source:'Pozo de lava (Isla Murlod)'},
+            {en:'Sun Tile',es:'Baldosa solar',source:'Árbol solar (Isla Ancestros)'},
+            {en:'Frozen Rainbow',es:'Arcoíris congelado',source:'Lab. alquimia (Fiordo)'},
+            {en:'Runestone',es:'Piedra rúnica',source:'Árbol de los sueños (Ancestros)'},
+            {en:'Nacre',es:'Nácar',source:'Fábrica de nácar'},
+            {en:'Eternal Ice',es:'Hielo eterno',source:'Fábrica de hielo (Fiordo)'},
+            {en:'Jewel',es:'Joya',source:'Taller de facetado (Ancestros)'}
+        ]
+    },
+    inventory: {
+        name: '🎒 Recursos de Inventario (19)',
+        items: [
+            {en:"Dino's Egg",es:'Huevo de dino',source:'Cueva misteriosa'},
+            {en:'Amber',es:'Ámbar',source:'Taller de ámbar, Mamut'},
+            {en:'Ostrich Egg',es:'Huevo de avestruz',source:'Granja de avestruces'},
+            {en:'Trout',es:'Trucha',source:'Cabaña de pesca'},
+            {en:'Juice',es:'Zumo',source:'Piña, Cerezo, Mango'},
+            {en:'Silkworm',es:'Gusano de seda',source:'Piña, Cerezo, Mango'},
+            {en:'Silk',es:'Seda',source:'Granja de gusanos de seda'},
+            {en:'Milk',es:'Leche',source:'Granja lechera'},
+            {en:'Mystical Dust',es:'Polvo místico',source:'Mejoras Exclusividad'},
+            {en:'Farming Kit',es:'Kit de granja',source:'Tienda de comestibles'},
+            {en:'Fishing Kit',es:'Kit de pesca',source:'Tienda de comestibles'},
+            {en:'Seeds',es:'Semillas',source:'Tienda de comestibles'},
+            {en:'Dressing',es:'Abono',source:'Tienda de comestibles'},
+            {en:'Badge',es:'Insignia',source:'Subir nivel mascota'},
+            {en:'Rainbow Shaving',es:'Virutas de arcoíris',source:'Lab. alquimia'},
+            {en:'Crystalline Glass',es:'Cristal cristalino',source:'Cuna de los vientos'},
+            {en:'Mercury',es:'Mercurio',source:'Parcela'},
+            {en:'Magnet',es:'Imán',source:'Cueva misteriosa'},
+            {en:'Treble Clef',es:'Clave de sol',source:'Sala de conciertos, Órgano'}
+        ]
+    },
+    competition: {
+        name: '🏆 Objetos de Competición (36)',
+        items: [
+            {en:'Ice Key',es:'Llave de hielo',source:'Entrada competiciones'},
+            {en:'Fire Key',es:'Llave de fuego',source:'Entrada competiciones'},
+            {en:'Flower Key',es:'Llave de flores',source:'Entrada competiciones'},
+            {en:'Sea Key',es:'Llave del mar',source:'Entrada competiciones'},
+            {en:'Shovel',es:'Pala',source:'Dino de nieve (+1)'},
+            {en:'Mittens',es:'Guantes',source:'Dino de nieve (+2)'},
+            {en:'Snow Sculpting Tool',es:'Herramienta de nieve',source:'Dino de nieve (+3)'},
+            {en:'Snow Baller',es:'Bola de nieve',source:'Dino de nieve (+4)'},
+            {en:'Bucket',es:'Cubo',source:'Dino de nieve (+5)'},
+            {en:'Snowflake',es:'Copo de nieve',source:'Premio Dino nieve'},
+            {en:'Ice Sphere',es:'Esfera de hielo',source:'Premio Dino nieve'},
+            {en:'Ice Dino',es:'Dino de hielo',source:'Premio Dino nieve'},
+            {en:'Cigarette Lighter',es:'Mechero',source:'Montaña fuego (+1)'},
+            {en:'Torch',es:'Antorcha',source:'Montaña fuego (+2)'},
+            {en:'Fire Amulet',es:'Amuleto de fuego',source:'Montaña fuego (+3)'},
+            {en:'Fire Shaman Tambourine',es:'Pandereta chamán',source:'Montaña fuego (+4)'},
+            {en:'Fire Totem',es:'Tótem de fuego',source:'Montaña fuego (+5)'},
+            {en:'Spark',es:'Chispa',source:'Premio Montaña fuego'},
+            {en:'Magma Ball',es:'Bola de magma',source:'Premio Montaña fuego'},
+            {en:'Volcanic Dino',es:'Dino volcánico',source:'Premio Montaña fuego'},
+            {en:'Snowdrop',es:'Campanilla',source:'Jardín primaveral (+1)'},
+            {en:'Lily Valley',es:'Lirio del valle',source:'Jardín primaveral (+2)'},
+            {en:'Tulip',es:'Tulipán',source:'Jardín primaveral (+3)'},
+            {en:'Violet',es:'Violeta',source:'Jardín primaveral (+4)'},
+            {en:'Narcissus',es:'Narciso',source:'Jardín primaveral (+5)'},
+            {en:'Clover',es:'Trébol',source:'Premio Jardín primaveral'},
+            {en:'Rose',es:'Rosa',source:'Premio Jardín primaveral'},
+            {en:'Golden Dino',es:'Dino dorado',source:'Premio Jardín primaveral'},
+            {en:'Oyster',es:'Ostra',source:'Gigante púrpura (+1)'},
+            {en:'Shrimp',es:'Gamba',source:'Gigante púrpura (+2)'},
+            {en:'Crab',es:'Cangrejo',source:'Gigante púrpura (+3)'},
+            {en:'Tuna',es:'Atún',source:'Gigante púrpura (+4)'},
+            {en:'Octopus',es:'Pulpo',source:'Gigante púrpura (+5)'},
+            {en:'Starfish',es:'Estrella de mar',source:'Premio Gigante púrpura'},
+            {en:'Seashell',es:'Concha',source:'Premio Gigante púrpura'},
+            {en:'Coral Dino',es:'Dino de coral',source:'Premio Gigante púrpura'}
+        ]
+    },
+    currency: {
+        name: '💰 Monedas y Experiencia (3)',
+        items: [
+            {en:'Gold',es:'Oro',source:'Impuestos, misiones, deals'},
+            {en:'Gems',es:'Gemas',source:'Subir nivel, compra'},
+            {en:'Experience',es:'Experiencia',source:'Misiones, construcción, deals'}
+        ]
+    }
 };
 
-const CATEGORY_NAMES = {
-    basic: '🪨 Recursos Básicos',
-    added: '✨ Recursos Añadidos',
-    inventory: '🎒 Recursos de Inventario',
-    competition: '🏆 Objetos de Competición',
-    gold: '💰 Monedas y Experiencia'
-};
-
-// ==================== STATE ====================
-let state = {
-    missions: [],
-    inventoryQty: {},
-    buildings: []
-};
-
-function loadState() {
-    try {
-        const saved = localStorage.getItem('tribez_tracker');
-        if (saved) {
-            const parsed = JSON.parse(saved);
-            state.missions = parsed.missions || [];
-            state.inventoryQty = parsed.inventoryQty || {};
-            state.buildings = parsed.buildings || [];
-        }
-    } catch(e) { console.error('Error loading state', e); }
-}
-
-function saveState() {
-    localStorage.setItem('tribez_tracker', JSON.stringify(state));
-}
-
-// ==================== NAVIGATION ====================
-function showSection(id) {
-    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-
-    document.getElementById(id).classList.add('active');
-
-    const tabs = document.querySelectorAll('.tab');
-    const navs = document.querySelectorAll('.nav-item');
-    const sections = ['dashboard','missions','inventory','needed','buildings','upload'];
-    const idx = sections.indexOf(id);
-    if (idx >= 0 && idx < tabs.length) tabs[idx].classList.add('active');
-    if (idx >= 0 && idx < navs.length) navs[idx].classList.add('active');
-
-    if (id === 'dashboard') updateDashboard();
-    if (id === 'inventory') renderInventory();
-    if (id === 'needed') renderNeeded();
-    if (id === 'missions') renderMissions();
-    if (id === 'buildings') renderBuildings();
-}
-
-// ==================== MISSIONS ====================
-function addMission() {
-    const name = document.getElementById('mission-name').value.trim();
-    if (!name) { alert('Escribe el nombre de la misión'); return; }
-
-    const mission = {
-        id: Date.now(),
-        name: name,
-        island: document.getElementById('mission-island').value,
-        requirements: document.getElementById('mission-req').value.trim(),
-        resources: parseResources(document.getElementById('mission-resources').value),
-        rewards: document.getElementById('mission-rewards').value.trim(),
-        status: 'active'
-    };
-
-    state.missions.push(mission);
-    saveState();
-
-    // Clear form
-    document.getElementById('mission-name').value = '';
-    document.getElementById('mission-req').value = '';
-    document.getElementById('mission-resources').value = '';
-    document.getElementById('mission-rewards').value = '';
-
-    renderMissions();
-    alert('✅ Misión añadida: ' + name);
-}
-
-function parseResources(str) {
-    if (!str) return {};
-    const resources = {};
-    str.split(',').forEach(part => {
-        const [name, qty] = part.split(':').map(s => s.trim());
-        if (name && qty) resources[name] = parseInt(qty) || 0;
-    });
-    return resources;
-}
-
-function changeMissionStatus(id, newStatus) {
-    const mission = state.missions.find(m => m.id === id);
-    if (mission) {
-        mission.status = newStatus;
-        saveState();
-        renderMissions();
-    }
-}
-
-function removeMission(id) {
-    if (confirm('¿Eliminar esta misión?')) {
-        state.missions = state.missions.filter(m => m.id !== id);
-        saveState();
-        renderMissions();
-    }
-}
-
-let currentFilter = 'all';
-let currentSearch = '';
-
-function filterMissions(filter, btn) {
-    currentFilter = filter;
-    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-    if (btn) btn.classList.add('active');
-    renderMissions();
-}
-
-function searchMissions(query) {
-    currentSearch = query.toLowerCase();
-    renderMissions();
-}
-
-function renderMissions() {
-    const list = document.getElementById('mission-list');
-    let missions = state.missions;
-
-    if (currentFilter !== 'all') {
-        missions = missions.filter(m => m.status === currentFilter);
-    }
-    if (currentSearch) {
-        missions = missions.filter(m =>
-            m.name.toLowerCase().includes(currentSearch) ||
-            m.requirements.toLowerCase().includes(currentSearch) ||
-            (ISLANDS[m.island]?.name || '').toLowerCase().includes(currentSearch)
-        );
-    }
-
-    if (missions.length === 0) {
-        list.innerHTML = '<div class="empty-state"><div class="icon">📋</div><p>No hay misiones. Usa el formulario de arriba para añadir.</p></div>';
-        return;
-    }
-
-    list.innerHTML = missions.map(m => {
-        const island = ISLANDS[m.island] || {name: m.island, emoji: '🏝️'};
-        const statusClass = m.status === 'active' ? 'active' : m.status === 'done' ? 'done' : 'pending';
-        const resourcesText = Object.entries(m.resources || {}).map(([k,v]) => k + ': ' + v).join(', ');
-
-        return '<div class="mission-item ' + statusClass + '">' +
-            '<div class="mission-header">' +
-                '<span class="mission-title">' + m.name + '</span>' +
-                '<span class="mission-island">' + island.emoji + ' ' + m.island + '</span>' +
-            '</div>' +
-            (m.requirements ? '<div class="mission-req">📝 ' + m.requirements + '</div>' : '') +
-            (resourcesText ? '<div class="mission-req">💎 Recursos: ' + resourcesText + '</div>' : '') +
-            (m.rewards ? '<div class="mission-reward">🎁 ' + m.rewards + '</div>' : '') +
-            '<div class="mission-status-btn">' +
-                (m.status !== 'active' ? '<button class="status-btn btn-active" onclick="changeMissionStatus(' + m.id + ',\'active\')">⚡ Activa</button>' : '') +
-                (m.status !== 'done' ? '<button class="status-btn btn-done" onclick="changeMissionStatus(' + m.id + ',\'done\')">✅ Hecha</button>' : '') +
-                (m.status !== 'pending' ? '<button class="status-btn btn-pending" onclick="changeMissionStatus(' + m.id + ',\'pending\')">⏳ Pendiente</button>' : '') +
-                '<button class="status-btn btn-remove" onclick="removeMission(' + m.id + ')">🗑️</button>' +
-            '</div>' +
-        '</div>';
-    }).join('');
-}
-
-// ==================== INVENTORY ====================
-function renderInventory(searchQuery) {
-    const list = document.getElementById('inventory-list');
-    let html = '';
-
-    for (const [catKey, catResources] of Object.entries(RESOURCES_DB)) {
-        let filtered = catResources;
-        if (searchQuery) {
-            filtered = catResources.filter(r =>
-                r.es.toLowerCase().includes(searchQuery) ||
-                r.en.toLowerCase().includes(searchQuery)
-            );
-        }
-        if (filtered.length === 0) continue;
-
-        html += '<div class="resource-category">';
-        html += '<div class="category-header">' + CATEGORY_NAMES[catKey] + ' (' + filtered.length + ')</div>';
-
-        filtered.forEach(r => {
-            const qty = state.inventoryQty[r.en] || 0;
-            html += '<div class="resource-item">' +
-                '<div class="resource-name">' + r.es + ' <small>(' + r.en + ')</small></div>' +
-                '<div class="resource-qty">' +
-                    '<button class="qty-btn qty-minus" onclick="changeQty(\'' + r.en.replace(/'/g, "\\'") + '\', -1)">−</button>' +
-                    '<input type="number" class="qty-input" value="' + qty + '" min="0" ' +
-                        'onchange="setQty(\'' + r.en.replace(/'/g, "\\'") + '\', this.value)">' +
-                    '<button class="qty-btn qty-plus" onclick="changeQty(\'' + r.en.replace(/'/g, "\\'") + '\', 1)">+</button>' +
-                '</div>' +
-            '</div>';
-        });
-
-        html += '</div>';
-    }
-
-    list.innerHTML = html;
-}
-
-function searchResources(query) {
-    renderInventory(query.toLowerCase());
-}
-
-function changeQty(resourceEn, delta) {
-    const current = state.inventoryQty[resourceEn] || 0;
-    const newVal = Math.max(0, current + delta);
-    state.inventoryQty[resourceEn] = newVal;
-    saveState();
-    renderInventory();
-}
-
-function setQty(resourceEn, val) {
-    state.inventoryQty[resourceEn] = Math.max(0, parseInt(val) || 0);
-    saveState();
-}
-
-// ==================== NEEDED RESOURCES ====================
-function renderNeeded() {
-    const activeMissions = state.missions.filter(m => m.status === 'active');
-    const neededList = document.getElementById('needed-list');
-    const summaryText = document.getElementById('need-summary-text');
-
-    if (activeMissions.length === 0) {
-        summaryText.textContent = 'No tienes misiones activas. Añade misiones para ver qué recursos necesitas.';
-        neededList.innerHTML = '<div class="empty-state"><div class="icon">🔍</div><p>Añade misiones activas primero</p></div>';
-        return;
-    }
-
-    // Aggregate needed resources from all active missions
-    const totalNeeded = {};
-    activeMissions.forEach(m => {
-        for (const [res, qty] of Object.entries(m.resources || {})) {
-            totalNeeded[res] = (totalNeeded[res] || 0) + qty;
-        }
-    });
-
-    if (Object.keys(totalNeeded).length === 0) {
-        summaryText.textContent = activeMissions.length + ' misiones activas, pero ninguna tiene recursos especificados. Edita las misiones para añadir recursos (ej: Wood:50, Stone:30).';
-        neededList.innerHTML = '';
-        return;
-    }
-
-    let missingCount = 0;
-    let html = '';
-
-    // Group by mission
-    html += '<div class="section-title">📋 Por Misión Activa</div>';
-    activeMissions.forEach(m => {
-        if (Object.keys(m.resources || {}).length === 0) return;
-        const island = ISLANDS[m.island] || {emoji: '🏝️'};
-        html += '<div class="card"><h3>' + island.emoji + ' ' + m.name + '</h3>';
-
-        for (const [res, need] of Object.entries(m.resources)) {
-            const have = state.inventoryQty[res] || 0;
-            const diff = have - need;
-            const ok = diff >= 0;
-            if (!ok) missingCount++;
-
-            // Find Spanish name
-            let esName = res;
-            for (const cat of Object.values(RESOURCES_DB)) {
-                const found = cat.find(r => r.en.toLowerCase() === res.toLowerCase());
-                if (found) { esName = found.es; break; }
-            }
-
-            html += '<div class="needed-item ' + (ok ? 'needed-ok' : 'needed-missing') + '">' +
-                '<div class="needed-name">' + esName + ' <small>(' + res + ')</small></div>' +
-                '<div class="needed-values">' +
-                    '<span class="need">Necesitas: ' + need + '</span> | ' +
-                    '<span class="have">Tienes: ' + have + '</span>' +
-                    (ok ? ' ✅' : ' | <span class="missing">Faltan: ' + Math.abs(diff) + '</span>') +
-                '</div>' +
-            '</div>';
-        }
-        html += '</div>';
-    });
-
-    // Total summary
-    html += '<div class="section-title">📊 Resumen Total</div>';
-    for (const [res, need] of Object.entries(totalNeeded)) {
-        const have = state.inventoryQty[res] || 0;
-        const diff = have - need;
-        const ok = diff >= 0;
-
-        let esName = res;
-        for (const cat of Object.values(RESOURCES_DB)) {
-            const found = cat.find(r => r.en.toLowerCase() === res.toLowerCase());
-            if (found) { esName = found.es; break; }
-        }
-
-        html += '<div class="needed-item ' + (ok ? 'needed-ok' : 'needed-missing') + '">' +
-            '<div class="needed-name">' + esName + '</div>' +
-            '<div class="needed-values">' +
-                '<span class="need">Total: ' + need + '</span> | ' +
-                '<span class="have">Tienes: ' + have + '</span>' +
-                (ok ? ' ✅' : ' | <span class="missing">Faltan: ' + Math.abs(diff) + '</span>') +
-            '</div>' +
-        '</div>';
-    }
-
-    summaryText.textContent = activeMissions.length + ' misiones activas | ' +
-        Object.keys(totalNeeded).length + ' recursos necesarios | ' +
-        missingCount + ' te faltan';
-
-    neededList.innerHTML = html;
-}
-
-// ==================== BUILDINGS ====================
-function renderBuildings(searchQuery) {
-    const list = document.getElementById('building-list');
-
-    if (state.buildings.length === 0) {
-        list.innerHTML = '<div class="empty-state"><div class="icon">🏭</div>' +
-            '<p>No hay edificios cargados.<br>Sube tu Excel en la pestaña 📤 Cargar<br>o añádelos manualmente.</p></div>';
-        return;
-    }
-
-    let buildings = state.buildings;
-    if (searchQuery) {
-        buildings = buildings.filter(b =>
-            (b.name || '').toLowerCase().includes(searchQuery)
-        );
-    }
-
-    // Group by building name
-    const grouped = {};
-    buildings.forEach(b => {
-        if (!grouped[b.name]) grouped[b.name] = [];
-        grouped[b.name].push(b);
-    });
-
-    let html = '';
-    for (const [name, deals] of Object.entries(grouped)) {
-        html += '<div class="card"><h3>🏭 ' + name + '</h3>';
-        deals.forEach(d => {
-            html += '<div style="font-size:0.75em; padding:4px 0; border-bottom:1px solid #f0f0f0;">' +
-                '<strong>Nv.' + (d.level || '?') + '</strong> ' + (d.type || '') + ' → ' +
-                (d.produces || 'Sin datos') +
-            '</div>';
-        });
-        html += '</div>';
-    }
-
-    list.innerHTML = html;
-}
-
-function searchBuildings(query) {
-    renderBuildings(query.toLowerCase());
-}
-
-// ==================== DASHBOARD ====================
-function updateDashboard() {
-    const active = state.missions.filter(m => m.status === 'active');
-    const done = state.missions.filter(m => m.status === 'done');
-    const total = state.missions.length;
-
-    document.getElementById('stat-active').textContent = active.length;
-    document.getElementById('stat-done').textContent = done.length;
-    document.getElementById('stat-total').textContent = total;
-
-    // Count missing resources
-    let missingCount = 0;
-    active.forEach(m => {
-        for (const [res, need] of Object.entries(m.resources || {})) {
-            if ((state.inventoryQty[res] || 0) < need) missingCount++;
-        }
-    });
-    document.getElementById('stat-missing').textContent = missingCount;
-
-    // Progress
-    const pct = total > 0 ? Math.round((done.length / total) * 100) : 0;
-    document.getElementById('progress-fill').style.width = pct + '%';
-    document.getElementById('progress-text').textContent = pct + '% (' + done.length + '/' + total + ')';
-
-    // Active missions on dashboard
-    const activeList = document.getElementById('dashboard-active-list');
-    if (active.length === 0) {
-        activeList.innerHTML = '<div class="empty-state"><p>No hay misiones activas</p></div>';
-    } else {
-        activeList.innerHTML = active.map(m => {
-            const island = ISLANDS[m.island] || {emoji: '🏝️', name: m.island};
-            return '<div style="padding:8px 0; border-bottom:1px solid #f0f0f0; font-size:0.8em;">' +
-                '<strong>' + island.emoji + ' ' + m.name + '</strong>' +
-                (m.requirements ? '<br><span style="color:#666;">' + m.requirements + '</span>' : '') +
-            '</div>';
-        }).join('');
-    }
-
-    // Island progress
-    const islandProgress = document.getElementById('island-progress');
-    let ipHtml = '';
-    for (const [code, info] of Object.entries(ISLANDS)) {
-        const islandMissions = state.missions.filter(m => m.island === code);
-        const islandDone = islandMissions.filter(m => m.status === 'done').length;
-        const islandTotal = islandMissions.length;
-        const islandPct = islandTotal > 0 ? Math.round((islandDone / islandTotal) * 100) : 0;
-
-        ipHtml += '<div class="island-row">' +
-            '<div class="island-name">' + info.emoji + ' ' + info.name + '</div>' +
-            '<div class="island-bar"><div class="island-fill" style="width:' + islandPct + '%"></div></div>' +
-            '<div class="island-pct">' + islandPct + '%</div>' +
-        '</div>';
-    }
-    islandProgress.innerHTML = ipHtml;
-}
-
-// ==================== FILE UPLOAD ====================
-function handleFileUpload(input) {
-    const file = input.files[0];
-    if (!file) return;
-
-    alert('📁 Archivo seleccionado: ' + file.name + '\n\nNota: Para procesar Excel necesitas la librería SheetJS.\nAñade esta línea en el <head> del HTML:\n<script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"><\/script>\n\nO puedes importar los datos manualmente.');
-}
-
-function exportData() {
-    const dataStr = JSON.stringify(state, null, 2);
-    const blob = new Blob([dataStr], {type: 'application/json'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'tribez_tracker_backup.json';
-    a.click();
-    URL.revokeObjectURL(url);
-}
-
-// ==================== INIT ====================
-loadState();
-updateDashboard();
-renderMissions();
-renderInventory();
-renderBuildings();
-
-// Register Service Worker
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js').catch(function(){});
-}
-</script>
-
-</body>
-</html>
-
+// Buildings Database
+var BUILDINGS_DB = [
+    // === PRODUCTION: BASIC ===
+    {cat:'production',en:'Patch',es:'Parcela',produces:'Food / Comida',level:1,mb:1,islands:'Todas excepto Fiordo de Mármol',
+     deals:[{n:'Watermelons',t:'3:00',cost:'7 Gold',income:'15 Food',rate:'300/hr',xp:1},{n:'Pumpkins',t:'30:00',cost:'40 Gold',income:'50 Food',rate:'100/hr',xp:3},{n:'Corn',t:'1:00:00',cost:'70 Gold',income:'80 Food',rate:'80/hr',xp:5},{n:'Wheat',t:'2:00:00',cost:'120 Gold',income:'130 Food',rate:'65/hr',xp:8}]},
+    {cat:'production',en:"Forester's Hut",es:'Cabaña del Leñador',produces:'Wood / Madera',level:4,mb:1,islands:'Todas excepto Bahía Granjero, Cala Pescador',
+     construction:[{lv:1,t:'1:00',cost:'75G 100F',w:1,inc:'10G 10F',gem:1},{lv:2,t:'1:00',cost:'50G 75F',w:1,inc:'5G 2F',gem:1},{lv:3,t:'1:00',cost:'75G 120F',w:1,inc:'5G 2F',gem:1},{lv:4,t:'3:00',cost:'100G 150F',w:1,inc:'5G 2F',gem:1}],
+     deals:[{n:'Quick',t:'4:40',cost:'40G 1W',income:'30 Wood 3G',rate:'385/hr',xp:2},{n:'Standard',t:'30:00',cost:'100G 1W',income:'60 Wood 6G',rate:'120/hr',xp:4},{n:'Lengthy',t:'1:00:00',cost:'180G 1W',income:'100 Wood 10G',rate:'100/hr',xp:8},{n:'Long-Term',t:'2:00:00',cost:'300G 1W',income:'150 Wood 30G',rate:'75/hr',xp:12}]},
+    {cat:'production',en:'Quarry',es:'Cantera',produces:'Stone / Piedra',level:4,mb:2,islands:'Todas excepto Bahía Granjero, Cala Pescador',
+     construction:[{lv:1,t:'2:00:00',cost:'120G 120F 200S',w:2,inc:'10G',gem:4},{lv:2,t:'1:00',cost:'50G 100F 100S',w:2,inc:'5G',gem:0},{lv:3,t:'3:00',cost:'100G 150F 150S',w:2,inc:'5G',gem:1},{lv:4,t:'3:00',cost:'150G 200F 250S',w:2,inc:'5G',gem:1}],
+     deals:[{n:'Quick',t:'15:00',cost:'60G 1W',income:'20 Stone 10G',rate:'80/hr',xp:3},{n:'Standard',t:'1:00:00',cost:'125G 1W',income:'45 Stone 30G',rate:'45/hr',xp:6},{n:'Lengthy',t:'2:00:00',cost:'280G 1W',income:'90 Stone 50G',rate:'45/hr',xp:12},{n:'Long-Term',t:'3:00:00',cost:'500G 1W',income:'150 Stone 70G',rate:'50/hr',xp:18}]},
+    {cat:'production',en:'Rice Field',es:'Arrozal',produces:'Food / Comida',level:6,mb:1,islands:'Todas excepto Cala Pescador',
+     deals:[{n:'Quick',t:'5:00',cost:'10G',income:'20 Food',rate:'240/hr',xp:1},{n:'Standard',t:'30:00',cost:'50G',income:'70 Food',rate:'140/hr',xp:3},{n:'Lengthy',t:'1:00:00',cost:'90G',income:'110 Food',rate:'110/hr',xp:5},{n:'Long-Term',t:'2:00:00',cost:'150G',income:'170 Food',rate:'85/hr',xp:8}]},
+    {cat:'production',en:'Coffee Tree',es:'Cafeto',produces:'Food / Comida',level:8,mb:2,islands:'Todas excepto Fiordo, Piamonte, Cala Pescador',
+     deals:[{n:'Quick',t:'10:00',cost:'20G',income:'30 Food',rate:'180/hr',xp:2},{n:'Standard',t:'1:00:00',cost:'80G',income:'100 Food',rate:'100/hr',xp:4},{n:'Lengthy',t:'2:00:00',cost:'150G',income:'170 Food',rate:'85/hr',xp:8},{n:'Long-Term',t:'4:00:00',cost:'250G',income:'280 Food',rate:'70/hr',xp:14}]},
+    {cat:'production',en:'Orange Tree',es:'Naranjo',produces:'Food / Comida',level:12,mb:3,islands:'Todas excepto Cala Pescador',
+     deals:[{n:'Quick',t:'30:00',cost:'50G',income:'75 Food',rate:'150/hr',xp:3},{n:'Standard',t:'1:00:00',cost:'100G',income:'130 Food',rate:'130/hr',xp:5},{n:'Lengthy',t:'2:00:00',cost:'180G',income:'220 Food',rate:'110/hr',xp:10},{n:'Long-Term',t:'4:00:00',cost:'300G',income:'350 Food',rate:'87/hr',xp:16}]},
+    {cat:'production',en:'Wishing Tree',es:'Árbol de los Deseos',produces:'Various / Varios',level:10,mb:2,islands:'Todas excepto Cala Pescador',
+     deals:[{n:'Quick',t:'15:00',cost:'Gems',income:'Dino Eggs + items',rate:'Variable',xp:2},{n:'Standard',t:'1:00:00',cost:'Gems',income:'Dino Eggs + items',rate:'Variable',xp:4},{n:'Lengthy',t:'2:00:00',cost:'Gems',income:'Dino Eggs + items',rate:'Variable',xp:8},{n:'Long-Term',t:'4:00:00',cost:'Gems',income:'Dino Eggs + items',rate:'Variable',xp:14}]},
+    {cat:'production',en:'Pig Farm',es:'Granja de Cerdos',produces:'Food / Comida',level:15,mb:4,islands:'Todas excepto Cala Pescador',
+     deals:[{n:'Quick',t:'15:00',cost:'30G 1W',income:'50 Food 5G',rate:'200/hr',xp:3},{n:'Standard',t:'1:00:00',cost:'100G 1W',income:'150 Food 15G',rate:'150/hr',xp:6},{n:'Lengthy',t:'2:00:00',cost:'200G 1W',income:'280 Food 25G',rate:'140/hr',xp:12},{n:'Long-Term',t:'4:00:00',cost:'350G 1W',income:'500 Food 40G',rate:'125/hr',xp:20}]},
+    {cat:'production',en:'Turkey Farm',es:'Granja de Pavos',produces:'Food / Comida',level:18,mb:4,islands:'Todas excepto Cala Pescador',
+     deals:[{n:'Quick',t:'15:00',cost:'40G 1W',income:'60 Food 8G',rate:'240/hr',xp:3},{n:'Standard',t:'1:00:00',cost:'120G 1W',income:'180 Food 20G',rate:'180/hr',xp:6},{n:'Lengthy',t:'2:00:00',cost:'250G 1W',income:'350 Food 35G',rate:'175/hr',xp:12},{n:'Long-Term',t:'4:00:00',cost:'400G 1W',income:'600 Food 60G',rate:'150/hr',xp:20}]},
+    // === PRODUCTION: INTERMEDIATE ===
+    {cat:'production',en:'Lumber Mill',es:'Serrería',produces:'Lumber / Madera aserrada',level:14,mb:4,islands:'Todas excepto Bahía Granjero, Cala Pescador',
+     deals:[{n:'Quick',t:'30:00',cost:'80G 30W 1Wk',income:'20 Lumber 8G',rate:'40/hr',xp:4},{n:'Standard',t:'1:00:00',cost:'150G 50W 1Wk',income:'40 Lumber 15G',rate:'40/hr',xp:8},{n:'Lengthy',t:'2:00:00',cost:'300G 80W 1Wk',income:'70 Lumber 25G',rate:'35/hr',xp:14},{n:'Long-Term',t:'4:00:00',cost:'500G 120W 1Wk',income:'120 Lumber 40G',rate:'30/hr',xp:24}]},
+    {cat:'production',en:'Stone Processing Mill',es:'Fábrica de Piedra',produces:'Cut Stone / Piedra cortada',level:20,mb:5,islands:'Todas excepto Bahía Granjero, Cala Pescador',
+     deals:[{n:'Quick',t:'30:00',cost:'100G 30St 1Wk',income:'15 Cut Stone 10G',rate:'30/hr',xp:5},{n:'Standard',t:'1:00:00',cost:'200G 60St 1Wk',income:'30 Cut Stone 20G',rate:'30/hr',xp:9},{n:'Lengthy',t:'2:00:00',cost:'400G 100St 1Wk',income:'55 Cut Stone 35G',rate:'27/hr',xp:16},{n:'Long-Term',t:'4:00:00',cost:'700G 160St 1Wk',income:'100 Cut Stone 60G',rate:'25/hr',xp:28}]},
+    {cat:'production',en:'Marble Pit',es:'Cantera de Mármol',produces:'Marble / Mármol',level:24,mb:6,islands:'Fiordo de Mármol y posteriores',
+     deals:[{n:'Quick',t:'1:00:00',cost:'600G 3Wk',income:'40 Marble 240G',rate:'13/hr',xp:9},{n:'Standard',t:'2:00:00',cost:'1200G 3Wk',income:'80 Marble 400G',rate:'13/hr',xp:17},{n:'Lengthy',t:'4:00:00',cost:'2400G 3Wk',income:'140 Marble 500G',rate:'12/hr',xp:29},{n:'Long-Term',t:'8:00:00',cost:'4000G 3Wk',income:'250 Marble 600G',rate:'10/hr',xp:53}]},
+    {cat:'production',en:'Sand Pit',es:'Arenero',produces:'Sand / Arena',level:35,mb:8,islands:'Costa Misteriosa',
+     deals:[{n:'Quick',t:'1:00:00',cost:'800G 3Wk',income:'30 Sand 200G',rate:'30/hr',xp:10},{n:'Standard',t:'2:00:00',cost:'1500G 3Wk',income:'60 Sand 350G',rate:'30/hr',xp:18},{n:'Lengthy',t:'4:00:00',cost:'3000G 3Wk',income:'110 Sand 500G',rate:'27/hr',xp:32},{n:'Long-Term',t:'8:00:00',cost:'5000G 3Wk',income:'200 Sand 700G',rate:'25/hr',xp:58}]},
+    {cat:'production',en:'Marble Processing Mill',es:'Fábrica de Mármol',produces:'Cut Marble / Mármol cortado',level:34,mb:8,islands:'Costa Misteriosa y posteriores',
+     construction:[{lv:1,t:'12:00:00',cost:'1500G 300F 6000S',w:4,inc:'500G',gem:24},{lv:2,t:'2:00',cost:'700G 250F 3000S',w:3,inc:'1G',gem:0},{lv:3,t:'40:00',cost:'1000G 350F 5000S',w:3,inc:'2G',gem:0},{lv:4,t:'1:20:00',cost:'1500G 700F 8000S',w:3,inc:'3G',gem:0}],
+     deals:[{n:'Quick',t:'1:00:00',cost:'1000G 30Mb 20Sd',income:'15 Cut Marble',rate:'15/hr',xp:12},{n:'Standard',t:'2:00:00',cost:'2000G 60Mb 40Sd',income:'30 Cut Marble',rate:'15/hr',xp:22},{n:'Lengthy',t:'4:00:00',cost:'4000G 100Mb 70Sd',income:'55 Cut Marble',rate:'14/hr',xp:38},{n:'Long-Term',t:'8:00:00',cost:'7000G 180Mb 120Sd',income:'100 Cut Marble',rate:'12/hr',xp:68}]},
+    {cat:'production',en:'Coral Mining',es:'Minería de Coral',produces:'Coral',level:40,mb:9,islands:'Atolón de los Ancestros',
+     construction:[{lv:1,t:'12:00:00',cost:'1500G 300F 12000S',w:3,inc:'1000G',gem:24}],
+     deals:[{n:'Quick',t:'1:00:00',cost:'1200G 3Wk',income:'25 Coral',rate:'25/hr',xp:12},{n:'Standard',t:'2:00:00',cost:'2500G 3Wk',income:'50 Coral',rate:'25/hr',xp:22},{n:'Lengthy',t:'4:00:00',cost:'5000G 3Wk',income:'90 Coral',rate:'22/hr',xp:38},{n:'Long-Term',t:'8:00:00',cost:'8000G 3Wk',income:'160 Coral',rate:'20/hr',xp:68}]},
+    {cat:'production',en:'Laboratory',es:'Laboratorio',produces:'Glass / Cristal',level:38,mb:8,islands:'Costa Misteriosa y posteriores',
+     deals:[{n:'Quick',t:'1:00:00',cost:'1000G 20Sd 3Wk',income:'10 Glass',rate:'10/hr',xp:12},{n:'Standard',t:'2:00:00',cost:'2000G 40Sd 3Wk',income:'20 Glass',rate:'10/hr',xp:22},{n:'Lengthy',t:'4:00:00',cost:'4000G 70Sd 3Wk',income:'35 Glass',rate:'9/hr',xp:38},{n:'Long-Term',t:'8:00:00',cost:'7000G 120Sd 3Wk',income:'60 Glass',rate:'8/hr',xp:68}]},
+    {cat:'production',en:'Foundry',es:'Fundición',produces:'Copper / Cobre',level:42,mb:9,islands:'Atolón y posteriores',
+     deals:[{n:'Quick',t:'1:00:00',cost:'1500G 3Wk',income:'10 Copper',rate:'10/hr',xp:14},{n:'Standard',t:'2:00:00',cost:'3000G 3Wk',income:'20 Copper',rate:'10/hr',xp:25},{n:'Lengthy',t:'4:00:00',cost:'6000G 3Wk',income:'35 Copper',rate:'9/hr',xp:42},{n:'Long-Term',t:'8:00:00',cost:'10000G 3Wk',income:'60 Copper',rate:'8/hr',xp:75}]},
+    {cat:'production',en:'Paint Factory',es:'Fábrica de Pintura',produces:'Paint / Pintura',level:44,mb:10,islands:'Atolón y posteriores',
+     deals:[{n:'Quick',t:'1:00:00',cost:'1500G 15Coral',income:'8 Paint',rate:'8/hr',xp:14},{n:'Standard',t:'2:00:00',cost:'3000G 30Coral',income:'16 Paint',rate:'8/hr',xp:25},{n:'Lengthy',t:'4:00:00',cost:'6000G 50Coral',income:'28 Paint',rate:'7/hr',xp:42},{n:'Long-Term',t:'8:00:00',cost:'10000G 80Coral',income:'50 Paint',rate:'6/hr',xp:75}]},
+    // === PRODUCTION: ADVANCED ===
+    {cat:'production',en:'Sun Tree',es:'Árbol Solar',produces:'Sun Tile / Baldosa solar',level:16,mb:4,islands:'Solo Isla de los Ancestros',
+     deals:[{n:'Quick',t:'30:00',cost:'80G 20Lm 20W',income:'8 Sun Tile',rate:'16/hr',xp:4},{n:'Standard',t:'1:00:00',cost:'150G 40Lm 40W',income:'15 Sun Tile',rate:'15/hr',xp:8},{n:'Lengthy',t:'2:00:00',cost:'300G 70Lm 70W',income:'28 Sun Tile',rate:'14/hr',xp:14},{n:'Long-Term',t:'4:00:00',cost:'500G 110Lm 110W',income:'50 Sun Tile',rate:'12/hr',xp:24}]},
+    {cat:'production',en:'Alchemy Lab',es:'Laboratorio de Alquimia',produces:'Frozen Rainbow / Arcoíris congelado',level:22,mb:5,islands:'Solo Fiordo de Mármol',
+     deals:[{n:'Quick',t:'1:00:00',cost:'500G 15ST 10CS',income:'5 Frozen Rainbow',rate:'5/hr',xp:8},{n:'Standard',t:'2:00:00',cost:'1000G 30ST 20CS',income:'10 Frozen Rainbow',rate:'5/hr',xp:15},{n:'Lengthy',t:'4:00:00',cost:'2000G 50ST 35CS',income:'18 Frozen Rainbow',rate:'4/hr',xp:26},{n:'Long-Term',t:'8:00:00',cost:'3500G 80ST 55CS',income:'30 Frozen Rainbow',rate:'4/hr',xp:46}]},
+    {cat:'production',en:'Coal Workshop',es:'Taller de Carbón',produces:'Coal / Carbón',level:46,mb:10,islands:'Piamonte y posteriores',
+     deals:[{n:'Quick',t:'1:00:00',cost:'2000G 30Lm',income:'8 Coal',rate:'8/hr',xp:15},{n:'Standard',t:'2:00:00',cost:'4000G 60Lm',income:'16 Coal',rate:'8/hr',xp:28},{n:'Lengthy',t:'4:00:00',cost:'8000G 100Lm',income:'28 Coal',rate:'7/hr',xp:48},{n:'Long-Term',t:'8:00:00',cost:'14000G 160Lm',income:'50 Coal',rate:'6/hr',xp:85}]},
+    {cat:'production',en:'Polunarium Foundry',es:'Fundición de Polunario',produces:'Polunarium / Polunario',level:48,mb:10,islands:'Solo Tierras de Piamonte',
+     deals:[{n:'Quick',t:'1:00:00',cost:'2500G 10Cu 8Coal',income:'5 Polunarium',rate:'5/hr',xp:16},{n:'Standard',t:'2:00:00',cost:'5000G 20Cu 16Coal',income:'10 Polunarium',rate:'5/hr',xp:30},{n:'Lengthy',t:'4:00:00',cost:'10000G 35Cu 28Coal',income:'18 Polunarium',rate:'4/hr',xp:52},{n:'Long-Term',t:'8:00:00',cost:'18000G 60Cu 50Coal',income:'30 Polunarium',rate:'4/hr',xp:92}]},
+    {cat:'production',en:'Lava Glass Pit',es:'Pozo de Cristal de Lava',produces:'Lava Glass / Cristal de lava',level:44,mb:9,islands:'Solo Isla Murlod',
+     deals:[{n:'Quick',t:'1:00:00',cost:'1500G 15Coral 10Glass',income:'5 Lava Glass',rate:'5/hr',xp:14},{n:'Standard',t:'2:00:00',cost:'3000G 30Coral 20Glass',income:'10 Lava Glass',rate:'5/hr',xp:25},{n:'Lengthy',t:'4:00:00',cost:'6000G 50Coral 35Glass',income:'18 Lava Glass',rate:'4/hr',xp:42},{n:'Long-Term',t:'8:00:00',cost:'10000G 80Coral 60Glass',income:'30 Lava Glass',rate:'4/hr',xp:75}]},
+    {cat:'production',en:'Ice Factory',es:'Fábrica de Hielo',produces:'Eternal Ice / Hielo eterno',level:26,mb:6,islands:'Solo Fiordo de Mármol',
+     deals:[{n:'Quick',t:'1:00:00',cost:'600G 20W 20Lm',income:'8 Eternal Ice',rate:'8/hr',xp:8},{n:'Standard',t:'2:00:00',cost:'1200G 40W 40Lm',income:'15 Eternal Ice',rate:'8/hr',xp:15},{n:'Lengthy',t:'4:00:00',cost:'2400G 70W 70Lm',income:'28 Eternal Ice',rate:'7/hr',xp:26},{n:'Long-Term',t:'8:00:00',cost:'4000G 110W 110Lm',income:'50 Eternal Ice',rate:'6/hr',xp:46}]},
+    {cat:'production',en:'Dream Tree',es:'Árbol de los Sueños',produces:'Runestone / Piedra rúnica',level:28,mb:6,islands:'Solo
