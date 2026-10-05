@@ -2,1038 +2,1120 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="theme-color" content="#2d5016">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<link rel="manifest" href="manifest.json">
-<title>The Tribez Tracker</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Tribez Tracker</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2e7d32">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #f0f0f0;
+            color: #333;
+            min-height: 100vh;
+            padding-bottom: 70px;
+        }
+        header {
+            background: linear-gradient(135deg, #2e7d32, #43a047);
+            color: white;
+            padding: 15px 20px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        header h1 { font-size: 1.3em; }
+        header p { font-size: 0.75em; opacity: 0.9; }
 
-<!-- SheetJS para leer Excel -->
-<script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+        /* Tabs */
+        .tabs {
+            display: flex;
+            background: #fff;
+            border-bottom: 2px solid #e0e0e0;
+            overflow-x: auto;
+            position: sticky;
+            top: 62px;
+            z-index: 99;
+        }
+        .tab {
+            flex: 1;
+            min-width: 80px;
+            padding: 10px 5px;
+            text-align: center;
+            font-size: 0.75em;
+            font-weight: 600;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+        .tab.active { color: #2e7d32; border-bottom-color: #2e7d32; background: #f1f8e9; }
+        .tab:hover { background: #f5f5f5; }
 
-<style>
-/* ===== RESET & BASE ===== */
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body {
-  font-family: system-ui, -apple-system, sans-serif;
-  background: #f0f2f5;
-  color: #1a1a2e;
-  min-height: 100vh;
-  overflow-x: hidden;
-  padding-bottom: 70px;
-}
+        /* Sections */
+        .section { display: none; padding: 15px; }
+        .section.active { display: block; }
 
-/* ===== HEADER ===== */
-.header {
-  background: linear-gradient(135deg, #2d5016 0%, #4a7c23 50%, #2d5016 100%);
-  padding: 14px 20px;
-  text-align: center;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-}
-.header h1 { font-size: 20px; color: #fff; letter-spacing: 1px; }
-.header .subtitle { font-size: 11px; color: #b8d4a0; margin-top: 2px; }
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+        }
+        .card h3 { font-size: 0.95em; color: #2e7d32; margin-bottom: 8px; }
+        .card p { font-size: 0.8em; color: #555; line-height: 1.4; }
 
-/* ===== BOTTOM NAV ===== */
-.bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: #ffffff;
-  border-top: 2px solid #e0e0e0;
-  display: flex;
-  z-index: 100;
-  padding: 4px 0;
-  box-shadow: 0 -2px 10px rgba(0,0,0,0.08);
-}
-.nav-btn {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 8px 4px;
-  font-size: 10px;
-  color: #888;
-  cursor: pointer;
-  border: none;
-  background: none;
-  transition: color 0.2s;
-}
-.nav-btn.active { color: #2d5016; font-weight: 700; }
-.nav-btn:hover { color: #4a7c23; }
-.nav-btn span { font-size: 20px; margin-bottom: 2px; }
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+        }
+        .stat-card .number { font-size: 1.8em; font-weight: 700; }
+        .stat-card .label { font-size: 0.7em; color: #888; margin-top: 4px; }
+        .stat-green .number { color: #2e7d32; }
+        .stat-orange .number { color: #e65100; }
+        .stat-blue .number { color: #1565c0; }
+        .stat-purple .number { color: #6a1b9a; }
 
-/* ===== PAGES ===== */
-.page { display: none; padding: 16px; animation: fadeIn 0.3s ease; }
-.page.active { display: block; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+        /* Progress Bar */
+        .progress-container { margin: 15px 0; }
+        .progress-bar {
+            background: #e0e0e0;
+            border-radius: 10px;
+            height: 20px;
+            overflow: hidden;
+            position: relative;
+        }
+        .progress-fill {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.5s;
+            background: linear-gradient(90deg, #43a047, #66bb6a);
+        }
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 0.7em;
+            font-weight: 700;
+            color: #333;
+        }
 
-/* ===== CARDS ===== */
-.card {
-  background: #ffffff;
-  border: 1px solid #e0e0e0;
-  border-radius: 12px;
-  padding: 14px;
-  margin-bottom: 10px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-}
-.card-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #888; margin-bottom: 6px; }
-.card-value { font-size: 28px; font-weight: 700; font-family: 'Courier New', monospace; color: #2d5016; }
-.card-sub { font-size: 11px; color: #888; margin-top: 2px; }
+        /* Island Progress */
+        .island-progress {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
+        .island-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: white;
+            padding: 10px 12px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        }
+        .island-name { font-size: 0.75em; font-weight: 600; min-width: 120px; }
+        .island-bar { flex: 1; background: #e0e0e0; border-radius: 6px; height: 12px; overflow: hidden; }
+        .island-fill { height: 100%; border-radius: 6px; background: #43a047; transition: width 0.5s; }
+        .island-pct { font-size: 0.7em; font-weight: 600; min-width: 40px; text-align: right; }
 
-/* ===== STATS GRID ===== */
-.stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 14px; }
+        /* Mission List */
+        .mission-item {
+            background: white;
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 8px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+            border-left: 4px solid #e0e0e0;
+        }
+        .mission-item.active { border-left-color: #ff9800; }
+        .mission-item.done { border-left-color: #4caf50; opacity: 0.7; }
+        .mission-item.pending { border-left-color: #2196f3; }
+        .mission-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+        .mission-title { font-size: 0.85em; font-weight: 600; color: #333; }
+        .mission-island {
+            font-size: 0.65em;
+            padding: 2px 8px;
+            border-radius: 10px;
+            background: #e8f5e9;
+            color: #2e7d32;
+            font-weight: 600;
+        }
+        .mission-req { font-size: 0.75em; color: #666; margin-top: 4px; }
+        .mission-reward { font-size: 0.7em; color: #888; margin-top: 4px; font-style: italic; }
+        .mission-status-btn {
+            margin-top: 8px;
+            display: flex;
+            gap: 6px;
+        }
+        .status-btn {
+            padding: 4px 10px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.65em;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-active { background: #fff3e0; color: #e65100; }
+        .btn-done { background: #e8f5e9; color: #2e7d32; }
+        .btn-pending { background: #e3f2fd; color: #1565c0; }
+        .btn-remove { background: #fce4ec; color: #c62828; }
 
-/* ===== PROGRESS BARS ===== */
-.progress-item {
-  background: #ffffff;
-  border: 1px solid #e0e0e0;
-  border-radius: 10px;
-  padding: 12px 14px;
-  margin-bottom: 8px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-}
-.progress-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-.progress-label { font-size: 13px; font-weight: 600; color: #333; }
-.progress-pct { font-size: 13px; font-weight: 700; color: #2d5016; font-family: monospace; }
-.progress-bar { height: 8px; background: #e8e8e8; border-radius: 4px; overflow: hidden; }
-.progress-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, #4a7c23, #6abf40); transition: width 0.8s ease; }
+        /* Inventory */
+        .resource-category {
+            margin-bottom: 20px;
+        }
+        .category-header {
+            font-size: 0.85em;
+            font-weight: 700;
+            color: #2e7d32;
+            padding: 8px 12px;
+            background: #e8f5e9;
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+        .resource-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        }
+        .resource-name {
+            font-size: 0.78em;
+            font-weight: 500;
+            flex: 1;
+        }
+        .resource-name small { color: #999; font-weight: 400; }
+        .resource-qty {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .qty-btn {
+            width: 28px;
+            height: 28px;
+            border: none;
+            border-radius: 50%;
+            font-size: 1em;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .qty-minus { background: #ffcdd2; color: #c62828; }
+        .qty-plus { background: #c8e6c9; color: #2e7d32; }
+        .qty-input {
+            width: 55px;
+            text-align: center;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 4px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
 
-/* ===== SEARCH ===== */
-.search-box { position: relative; margin-bottom: 14px; }
-.search-box input {
-  width: 100%; padding: 12px 16px 12px 42px;
-  background: #ffffff; border: 2px solid #d0d0d0; border-radius: 12px;
-  color: #333; font-size: 14px; outline: none;
-}
-.search-box input:focus { border-color: #4a7c23; }
-.search-box input::placeholder { color: #aaa; }
-.search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 16px; }
+        /* Needed Resources */
+        .needed-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 12px;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        }
+        .needed-ok { border-left: 3px solid #4caf50; }
+        .needed-missing { border-left: 3px solid #f44336; }
+        .needed-name { font-size: 0.78em; font-weight: 500; flex: 1; }
+        .needed-values { font-size: 0.72em; text-align: right; }
+        .needed-values .have { color: #2e7d32; }
+        .needed-values .need { color: #e65100; }
+        .needed-values .missing { color: #c62828; font-weight: 700; }
 
-/* ===== FILTER CHIPS ===== */
-.filter-row { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 10px; scrollbar-width: none; }
-.filter-row::-webkit-scrollbar { display: none; }
-.chip {
-  flex-shrink: 0; padding: 7px 12px; background: #e8e8e8; border: 1px solid #d0d0d0;
-  border-radius: 20px; font-size: 12px; font-weight: 500; color: #666; cursor: pointer;
-}
-.chip.active { background: #2d5016; color: #fff; border-color: #2d5016; }
-.chip:hover { background: #d0d0d0; color: #333; }
+        /* Add Mission Form */
+        .add-form {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+        }
+        .form-group { margin-bottom: 10px; }
+        .form-group label {
+            display: block;
+            font-size: 0.75em;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 4px;
+        }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 0.8em;
+            font-family: inherit;
+        }
+        .form-group textarea { resize: vertical; min-height: 60px; }
+        .btn-primary {
+            width: 100%;
+            padding: 10px;
+            background: linear-gradient(135deg, #2e7d32, #43a047);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.85em;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-secondary {
+            width: 100%;
+            padding: 10px;
+            background: #e0e0e0;
+            color: #333;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.85em;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 6px;
+        }
 
-/* ===== MISSION ITEMS ===== */
-.mission-item {
-  background: #ffffff; border: 1px solid #e0e0e0; border-radius: 10px;
-  padding: 12px; margin-bottom: 8px; cursor: pointer; transition: all 0.15s;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-}
-.mission-item:hover { border-color: #4a7c23; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-.mission-name { font-size: 14px; font-weight: 600; color: #222; margin-bottom: 4px; }
-.mission-meta { display: flex; flex-wrap: wrap; gap: 6px; font-size: 11px; }
-.mission-detail { margin-top: 8px; font-size: 12px; color: #555; line-height: 1.5; display: none; border-top: 1px solid #e8e8e8; padding-top: 8px; }
-.mission-item.expanded .mission-detail { display: block; }
-.tag { padding: 3px 8px; border-radius: 6px; font-weight: 500; }
-.tag-isla { background: #e3f0ff; color: #1a6dd4; }
-.tag-done { background: #e6f9e6; color: #1a7a1a; }
-.tag-pending { background: #fff5e0; color: #b37400; }
-.tag-progress { background: #e3f0ff; color: #0066cc; }
+        /* Filters */
+        .filters {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+        .filter-btn {
+            padding: 5px 12px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            font-size: 0.7em;
+            font-weight: 600;
+            cursor: pointer;
+            background: white;
+            color: #666;
+        }
+        .filter-btn.active { background: #2e7d32; color: white; border-color: #2e7d32; }
 
-/* ===== STATUS SELECT ===== */
-.status-select {
-  padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 600;
-  border: none; cursor: pointer; outline: none;
-}
-.status-done { background: #e6f9e6; color: #1a7a1a; }
-.status-pending { background: #fff5e0; color: #b37400; }
-.status-progress { background: #e3f0ff; color: #0066cc; }
+        /* Search */
+        .search-box {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-size: 0.8em;
+            margin-bottom: 12px;
+            background: white;
+        }
 
-/* ===== TABLES ===== */
-.data-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; }
-.data-table th {
-  text-align: left; color: #888; font-weight: 600; padding: 8px 10px;
-  border-bottom: 2px solid #e0e0e0; font-size: 11px; text-transform: uppercase;
-}
-.data-table td { padding: 8px 10px; color: #333; border-bottom: 1px solid #f0f0f0; }
-.data-table tr:hover td { background: #f8f9fa; }
+        /* Upload Section */
+        .upload-area {
+            border: 2px dashed #ccc;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            background: white;
+            cursor: pointer;
+            margin-bottom: 15px;
+        }
+        .upload-area:hover { border-color: #2e7d32; background: #f1f8e9; }
+        .upload-area p { font-size: 0.8em; color: #666; }
+        .upload-area .icon { font-size: 2em; margin-bottom: 10px; }
 
-/* ===== RESOURCE GRID ===== */
-.resource-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
-.resource-item {
-  background: #ffffff; border: 1px solid #e0e0e0; border-radius: 8px;
-  padding: 10px; text-align: center; transition: all 0.15s;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-}
-.resource-item:hover { border-color: #4a7c23; }
-.resource-name { font-size: 12px; font-weight: 600; color: #222; }
-.resource-eng { font-size: 10px; color: #888; margin-top: 2px; }
+        /* Bottom Nav */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            display: flex;
+            box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
+            z-index: 100;
+        }
+        .nav-item {
+            flex: 1;
+            padding: 8px 0;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .nav-item .icon { font-size: 1.2em; }
+        .nav-item .label { font-size: 0.6em; color: #888; }
+        .nav-item.active .icon { color: #2e7d32; }
+        .nav-item.active .label { color: #2e7d32; font-weight: 600; }
 
-/* ===== INVENTORY INPUT ===== */
-.inv-input {
-  width: 70px; padding: 4px 8px; background: #f8f9fa; border: 1px solid #d0d0d0;
-  border-radius: 6px; color: #2d5016; font-size: 14px; font-family: monospace;
-  text-align: center; outline: none;
-}
-.inv-input:focus { border-color: #4a7c23; }
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-size: 0.6em;
+            font-weight: 700;
+        }
+        .badge-active { background: #fff3e0; color: #e65100; }
+        .badge-done { background: #e8f5e9; color: #2e7d32; }
 
-/* ===== UPLOAD AREA ===== */
-.upload-area {
-  border: 3px dashed #c0c0c0; border-radius: 16px; padding: 40px 20px;
-  text-align: center; cursor: pointer; background: #ffffff; transition: all 0.3s;
-}
-.upload-area:hover, .upload-area.dragover { border-color: #4a7c23; background: #f0f8e8; }
-.upload-icon { font-size: 48px; margin-bottom: 12px; }
-.upload-text { font-size: 16px; font-weight: 600; color: #333; }
-.upload-sub { font-size: 13px; color: #888; margin-top: 8px; }
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+        .empty-state .icon { font-size: 3em; margin-bottom: 10px; }
+        .empty-state p { font-size: 0.85em; }
 
-/* ===== STATUS BADGES ===== */
-.status-row { display: flex; gap: 6px; margin-top: 12px; flex-wrap: wrap; }
-.status-badge {
-  display: flex; align-items: center; gap: 5px; padding: 5px 10px;
-  border-radius: 8px; font-size: 11px; font-weight: 600;
-}
-.status-loaded { background: #e6f9e6; color: #1a7a1a; }
-.status-empty { background: #ffe8e8; color: #cc3333; }
+        /* Section Title */
+        .section-title {
+            font-size: 0.9em;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
 
-/* ===== INFO BOX ===== */
-.info-box {
-  background: #f0f8e8; border-left: 4px solid #4a7c23; border-radius: 0 8px 8px 0;
-  padding: 12px 14px; margin-bottom: 14px; font-size: 13px; color: #555; line-height: 1.5;
-}
+        /* Toggle */
+        .toggle-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+        }
+        .toggle-label { font-size: 0.8em; }
 
-/* ===== SECTION TITLE ===== */
-.section-title { font-size: 17px; font-weight: 700; color: #222; margin-bottom: 14px; }
-
-/* ===== BUILDING ITEM ===== */
-.building-item {
-  background: #ffffff; border: 1px solid #e0e0e0; border-radius: 10px;
-  margin-bottom: 8px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-}
-.building-header {
-  padding: 12px 14px; cursor: pointer; font-weight: 600; font-size: 14px;
-  color: #222; display: flex; justify-content: space-between; align-items: center;
-}
-.building-header:hover { background: #f8f9fa; }
-.building-content { display: none; padding: 0 14px 12px; }
-.building-item.expanded .building-content { display: block; }
-.building-arrow { font-size: 10px; color: #aaa; transition: transform 0.2s; }
-.building-item.expanded .building-arrow { transform: rotate(90deg); }
-
-/* ===== COUNTER ===== */
-.counter { display: flex; align-items: center; gap: 4px; }
-.counter-btn {
-  width: 28px; height: 28px; border-radius: 6px; border: 1px solid #d0d0d0;
-  background: #f0f8e8; color: #2d5016; font-size: 16px; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-}
-.counter-btn:hover { background: #d4ecc0; }
-
-/* ===== PAGINATION ===== */
-.pagination { display: flex; justify-content: center; gap: 8px; margin-top: 14px; }
-.page-btn {
-  padding: 8px 14px; background: #e8e8e8; border: 1px solid #d0d0d0;
-  border-radius: 8px; color: #555; cursor: pointer; font-size: 12px;
-}
-.page-btn.active { background: #2d5016; color: #fff; border-color: #2d5016; }
-.page-btn:hover { background: #d0d0d0; }
-.page-info { color: #888; font-size: 12px; padding: 8px; }
-
-/* ===== TOAST ===== */
-.toast {
-  position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
-  background: #2d5016; color: #fff; padding: 12px 24px; border-radius: 10px;
-  font-size: 14px; font-weight: 600; z-index: 200; opacity: 0; transition: opacity 0.3s;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-}
-.toast.show { opacity: 1; }
-
-/* ===== HIDDEN FILE INPUT ===== */
-#fileInput { display: none; }
-
-/* ===== SCROLLBAR ===== */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: #f0f2f5; }
-::-webkit-scrollbar-thumb { background: #c0c0c0; border-radius: 3px; }
-
-/* ===== DELETE BUTTON ===== */
-.delete-btn {
-  width: 100%; padding: 12px; background: #ffe8e8; color: #cc3333;
-  border: 2px solid #ffcccc; border-radius: 10px; font-size: 14px;
-  font-weight: 600; cursor: pointer;
-}
-.delete-btn:hover { background: #ffd4d4; }
-</style>
+        /* Resource need summary */
+        .need-summary {
+            background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .need-summary h3 { font-size: 0.85em; color: #e65100; margin-bottom: 8px; }
+    </style>
 </head>
 <body>
 
-<!-- ===== HEADER ===== -->
-<div class="header">
-  <h1>🏝️ The Tribez Tracker</h1>
-  <div class="subtitle">Tu guía personal de misiones, recursos y edificios</div>
+<header>
+    <h1>🏝️ The Tribez Tracker</h1>
+    <p>Tu guía personal de misiones, recursos y edificios</p>
+</header>
+
+<div class="tabs">
+    <div class="tab active" onclick="showSection('dashboard')">📊 Dashboard</div>
+    <div class="tab" onclick="showSection('missions')">📋 Misiones</div>
+    <div class="tab" onclick="showSection('inventory')">💎 Inventario</div>
+    <div class="tab" onclick="showSection('needed')">🔍 Necesitas</div>
+    <div class="tab" onclick="showSection('buildings')">🏭 Edificios</div>
+    <div class="tab" onclick="showSection('upload')">📤 Cargar</div>
 </div>
 
-<!-- ===== TOAST NOTIFICATION ===== -->
-<div class="toast" id="toast"></div>
+<!-- ==================== DASHBOARD ==================== -->
+<div id="dashboard" class="section active">
+    <div class="stats-grid">
+        <div class="stat-card stat-orange">
+            <div class="number" id="stat-active">0</div>
+            <div class="label">⚡ MISIONES ACTIVAS</div>
+        </div>
+        <div class="stat-card stat-green">
+            <div class="number" id="stat-done">0</div>
+            <div class="label">✅ COMPLETADAS</div>
+        </div>
+        <div class="stat-card stat-blue">
+            <div class="number" id="stat-total">0</div>
+            <div class="label">📋 TOTAL MISIONES</div>
+        </div>
+        <div class="stat-card stat-purple">
+            <div class="number" id="stat-missing">0</div>
+            <div class="label">❌ RECURSOS FALTAN</div>
+        </div>
+    </div>
 
-<!-- ===== HIDDEN FILE INPUT ===== -->
-<input type="file" id="fileInput" accept=".xlsx,.xls">
+    <div class="card">
+        <h3>📈 Progreso General</h3>
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+                <div class="progress-text" id="progress-text">0%</div>
+            </div>
+        </div>
+    </div>
 
-<!-- ========================================= -->
-<!-- ===== PAGE 1: DASHBOARD ===== -->
-<!-- ========================================= -->
-<div class="page active" id="page-dashboard">
-  <div class="section-title">📊 Panel de Progreso</div>
-  <div class="stats-grid" id="dashboard-stats">
     <div class="card">
-      <div class="card-title">Misiones Totales</div>
-      <div class="card-value" id="stat-total">0</div>
-      <div class="card-sub">En tu tracker</div>
+        <h3>⚡ Misiones Activas Ahora</h3>
+        <div id="dashboard-active-list">
+            <div class="empty-state">
+                <p>No hay misiones activas. Ve a 📋 Misiones para añadir.</p>
+            </div>
+        </div>
     </div>
-    <div class="card">
-      <div class="card-title">✅ Completadas</div>
-      <div class="card-value" id="stat-done" style="color:#1a7a1a">0</div>
-      <div class="card-sub" id="stat-done-pct">0%</div>
-    </div>
-    <div class="card">
-      <div class="card-title">🔄 En Progreso</div>
-      <div class="card-value" id="stat-progress" style="color:#0066cc">0</div>
-      <div class="card-sub" id="stat-progress-pct">0%</div>
-    </div>
-    <div class="card">
-      <div class="card-title">⏳ Pendientes</div>
-      <div class="card-value" id="stat-pending" style="color:#b37400">0</div>
-      <div class="card-sub" id="stat-pending-pct">0%</div>
-    </div>
-  </div>
 
-  <div class="stats-grid">
     <div class="card">
-      <div class="card-title">💎 Recursos</div>
-      <div class="card-value" id="stat-recursos">0</div>
-      <div class="card-sub">Catalogados</div>
+        <h3>🏝️ Progreso por Isla</h3>
+        <div class="island-progress" id="island-progress"></div>
     </div>
-    <div class="card">
-      <div class="card-title">🏗️ Edificios</div>
-      <div class="card-value" id="stat-edificios">0</div>
-      <div class="card-sub">Industrias</div>
-    </div>
-  </div>
-
-  <div class="section-title">🏝️ Progreso por Isla</div>
-  <div id="island-progress"></div>
 </div>
 
-<!-- ========================================= -->
-<!-- ===== PAGE 2: MISIONES ===== -->
-<!-- ========================================= -->
-<div class="page" id="page-misiones">
-  <div class="section-title">📜 Buscador de Misiones</div>
-  <div class="search-box">
-    <span class="search-icon">🔍</span>
-    <input type="text" id="mission-search" placeholder="Buscar misión por nombre...">
-  </div>
-  <div class="filter-row" id="island-filters"></div>
-  <div class="filter-row">
-    <span class="chip active" data-status="all" onclick="filterByStatus('all')">Todas</span>
-    <span class="chip" data-status="done" onclick="filterByStatus('done')">✅ Hechas</span>
-    <span class="chip" data-status="pending" onclick="filterByStatus('pending')">⏳ Pendientes</span>
-    <span class="chip" data-status="progress" onclick="filterByStatus('progress')">🔄 En progreso</span>
-  </div>
-  <div id="mission-count" style="font-size:12px;color:#888;margin-bottom:10px;"></div>
-  <div id="mission-list"></div>
-  <div class="pagination" id="mission-pagination"></div>
-  <div class="info-box" style="margin-top:14px;" id="mission-info">
-    📌 Carga tu Excel en la pestaña "📤 Cargar" para ver todas las misiones.
-  </div>
-</div>
+<!-- ==================== MISIONES ==================== -->
+<div id="missions" class="section">
+    <div class="section-title">📋 Gestión de Misiones</div>
 
-<!-- ========================================= -->
-<!-- ===== PAGE 3: EDIFICIOS ===== -->
-<!-- ========================================= -->
-<div class="page" id="page-edificios">
-  <div class="section-title">🏗️ Edificios e Industrias</div>
-  <div class="search-box">
-    <span class="search-icon">🔍</span>
-    <input type="text" id="building-search" placeholder="Buscar edificio...">
-  </div>
-  <div id="building-list"></div>
-  <div class="info-box" style="margin-top:14px;" id="building-info">
-    📌 Carga tu Excel para ver todos los edificios con datos de tu hoja "Industrias".
-  </div>
-</div>
-
-<!-- ========================================= -->
-<!-- ===== PAGE 4: RECURSOS ===== -->
-<!-- ========================================= -->
-<div class="page" id="page-recursos">
-  <div class="section-title">💎 Catálogo de Recursos</div>
-  <div class="search-box">
-    <span class="search-icon">🔍</span>
-    <input type="text" id="resource-search" placeholder="Buscar recurso en español o inglés...">
-  </div>
-  <div class="resource-grid" id="resource-list"></div>
-  <div class="info-box" style="margin-top:14px;" id="resource-info">
-    📌 Carga tu Excel para ver los 87 recursos de tu hoja "Recursos".
-  </div>
-</div>
-
-<!-- ========================================= -->
-<!-- ===== PAGE 5: INVENTARIO ===== -->
-<!-- ========================================= -->
-<div class="page" id="page-inventario">
-  <div class="section-title">📦 Mi Inventario</div>
-  <div class="info-box">
-    Lleva el control de tus recursos. Los cambios se guardan automáticamente.
-  </div>
-  <div class="section-title" style="font-size:15px;">💰 Recursos Básicos</div>
-  <div class="stats-grid" id="inv-basics">
-    <div class="card">
-      <div class="card-title">🪙 Oro</div>
-      <div class="counter">
-        <button class="counter-btn" onclick="updateInv('oro',-100)">-</button>
-        <input class="inv-input" id="inv-oro" type="number" value="0" onchange="saveInventory()">
-        <button class="counter-btn" onclick="updateInv('oro',100)">+</button>
-      </div>
+    <!-- Add Mission Form -->
+    <div class="add-form" id="add-mission-form">
+        <div class="form-group">
+            <label>Nombre de la misión</label>
+            <input type="text" id="mission-name" placeholder="Ej: Build a Hut">
+        </div>
+        <div class="form-group">
+            <label>Isla</label>
+            <select id="mission-island">
+                <option value="IA">🏝️ Isla de los Ancestros</option>
+                <option value="MF">🏔️ Fiordo de Mármol</option>
+                <option value="MS">🌊 Costa Misteriosa</option>
+                <option value="AA">🐚 Atolón de los Ancestros</option>
+                <option value="MI">🌋 Isla Murlod</option>
+                <option value="AS">👽 Costa Alienígena</option>
+                <option value="PL">⛰️ Tierras de Piamonte</option>
+                <option value="FB">🌾 Bahía del Granjero</option>
+                <option value="CB">🐟 Cala del Pescador</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Requisitos (qué piden)</label>
+            <textarea id="mission-req" placeholder="Ej: Construir 2 cabañas, Recolectar 100 madera"></textarea>
+        </div>
+        <div class="form-group">
+            <label>Recursos necesarios (separados por coma)</label>
+            <input type="text" id="mission-resources" placeholder="Ej: Wood:50, Stone:30, Food:100">
+        </div>
+        <div class="form-group">
+            <label>Recompensas</label>
+            <input type="text" id="mission-rewards" placeholder="Ej: Gold 50, Experience 40">
+        </div>
+        <button class="btn-primary" onclick="addMission()">➕ Añadir Misión Activa</button>
     </div>
-    <div class="card">
-      <div class="card-title">🍖 Comida</div>
-      <div class="counter">
-        <button class="counter-btn" onclick="updateInv('comida',-10)">-</button>
-        <input class="inv-input" id="inv-comida" type="number" value="0" onchange="saveInventory()">
-        <button class="counter-btn" onclick="updateInv('comida',10)">+</button>
-      </div>
+
+    <!-- Filters -->
+    <div class="filters">
+        <div class="filter-btn active" onclick="filterMissions('all', this)">Todas</div>
+        <div class="filter-btn" onclick="filterMissions('active', this)">⚡ Activas</div>
+        <div class="filter-btn" onclick="filterMissions('done', this)">✅ Hechas</div>
+        <div class="filter-btn" onclick="filterMissions('pending', this)">⏳ Pendientes</div>
     </div>
-    <div class="card">
-      <div class="card-title">🪵 Madera</div>
-      <div class="counter">
-        <button class="counter-btn" onclick="updateInv('madera',-10)">-</button>
-        <input class="inv-input" id="inv-madera" type="number" value="0" onchange="saveInventory()">
-        <button class="counter-btn" onclick="updateInv('madera',10)">+</button>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-title">🪨 Piedra</div>
-      <div class="counter">
-        <button class="counter-btn" onclick="updateInv('piedra',-10)">-</button>
-        <input class="inv-input" id="inv-piedra" type="number" value="0" onchange="saveInventory()">
-        <button class="counter-btn" onclick="updateInv('piedra',10)">+</button>
-      </div>
-    </div>
-  </div>
-  <div class="section-title" style="font-size:15px;">💎 Recursos Avanzados</div>
-  <div id="inv-advanced"></div>
-  <div class="section-title" style="font-size:15px; margin-top:14px;">🏠 Mis Edificios</div>
-  <div id="inv-buildings"></div>
+
+    <input type="text" class="search-box" placeholder="🔍 Buscar misión..." oninput="searchMissions(this.value)">
+
+    <div id="mission-list"></div>
 </div>
 
-<!-- ========================================= -->
-<!-- ===== PAGE 6: CARGAR EXCEL ===== -->
-<!-- ========================================= -->
-<div class="page" id="page-cargar">
-  <div class="section-title">📤 Cargar tu Excel</div>
-  <div class="info-box">
-    Sube tu archivo <strong>"misiones the tribez.xlsx"</strong>. Los datos se guardan en el navegador — no necesitas volver a cargarlo cada vez.
-  </div>
-
-  <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
-    <div class="upload-icon">📁</div>
-    <div class="upload-text">Toca aquí para seleccionar tu Excel</div>
-    <div class="upload-sub">Formato: .xlsx</div>
-  </div>
-
-  <div class="section-title" style="font-size:15px; margin-top:20px;">📋 Estado de los Datos</div>
-  <div id="data-status"></div>
-
-  <div style="margin-top:20px;">
-    <button class="delete-btn" onclick="clearAllData()">
-      🗑️ Borrar todos los datos guardados
-    </button>
-  </div>
-
-  <div class="info-box" style="margin-top:14px;">
-    💡 <strong>Tip:</strong> Si actualizas tu Excel, simplemente vuelve a cargarlo aquí y los datos se reemplazarán.
-  </div>
+<!-- ==================== INVENTARIO ==================== -->
+<div id="inventory" class="section">
+    <div class="section-title">💎 Mi Inventario de Recursos</div>
+    <input type="text" class="search-box" placeholder="🔍 Buscar recurso..." oninput="searchResources(this.value)">
+    <div id="inventory-list"></div>
 </div>
 
-<!-- ===== BOTTOM NAVIGATION ===== -->
+<!-- ==================== NECESITAS ==================== -->
+<div id="needed" class="section">
+    <div class="section-title">🔍 Recursos que Necesitas</div>
+    <p style="font-size:0.75em; color:#666; margin-bottom:12px;">
+        Basado en tus misiones activas vs tu inventario actual
+    </p>
+
+    <div class="need-summary" id="need-summary">
+        <h3>📊 Resumen</h3>
+        <p style="font-size:0.8em;" id="need-summary-text">Añade misiones activas para ver qué recursos necesitas.</p>
+    </div>
+
+    <div id="needed-list"></div>
+</div>
+
+<!-- ==================== EDIFICIOS ==================== -->
+<div id="buildings" class="section">
+    <div class="section-title">🏭 Edificios e Industrias</div>
+    <input type="text" class="search-box" placeholder="🔍 Buscar edificio..." oninput="searchBuildings(this.value)">
+    <div id="building-list"></div>
+</div>
+
+<!-- ==================== CARGAR ==================== -->
+<div id="upload" class="section">
+    <div class="section-title">📤 Cargar Datos</div>
+
+    <div class="upload-area" onclick="document.getElementById('file-input').click()">
+        <div class="icon">📁</div>
+        <p>Toca para subir tu Excel<br><strong>misiones the tribez.xlsx</strong></p>
+        <input type="file" id="file-input" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleFileUpload(this)">
+    </div>
+
+    <div class="card">
+        <h3>ℹ️ Formato esperado</h3>
+        <p><strong>Hoja "Misiones":</strong> title, requeriments, Rewards, Status, Island</p>
+        <p><strong>Hoja "Industrias":</strong> Edificio, Nivel, Tipo, Recursos producidos</p>
+        <p><strong>Hoja "Recursos":</strong> Nombre español, Nombre inglés</p>
+    </div>
+
+    <div class="card">
+        <h3>💾 Datos Guardados</h3>
+        <p id="data-status">Los datos se guardan automáticamente en tu navegador.</p>
+        <button class="btn-secondary" onclick="exportData()">📥 Exportar datos (JSON)</button>
+        <button class="btn-secondary" onclick="if(confirm('¿Borrar TODOS los datos?')){localStorage.clear();location.reload();}">🗑️ Borrar todo</button>
+    </div>
+</div>
+
+<!-- Bottom Nav -->
 <div class="bottom-nav">
-  <button class="nav-btn active" onclick="showPage('dashboard')">
-    <span>📊</span>Dashboard
-  </button>
-  <button class="nav-btn" onclick="showPage('misiones')">
-    <span>📜</span>Misiones
-  </button>
-  <button class="nav-btn" onclick="showPage('edificios')">
-    <span>🏗️</span>Edificios
-  </button>
-  <button class="nav-btn" onclick="showPage('recursos')">
-    <span>💎</span>Recursos
-  </button>
-  <button class="nav-btn" onclick="showPage('inventario')">
-    <span>📦</span>Inventario
-  </button>
-  <button class="nav-btn" onclick="showPage('cargar')">
-    <span>📤</span>Cargar
-  </button>
+    <div class="nav-item active" onclick="showSection('dashboard')">
+        <div class="icon">📊</div>
+        <div class="label">Dashboard</div>
+    </div>
+    <div class="nav-item" onclick="showSection('missions')">
+        <div class="icon">📋</div>
+        <div class="label">Misiones</div>
+    </div>
+    <div class="nav-item" onclick="showSection('inventory')">
+        <div class="icon">💎</div>
+        <div class="label">Inventario</div>
+    </div>
+    <div class="nav-item" onclick="showSection('needed')">
+        <div class="icon">🔍</div>
+        <div class="label">Necesitas</div>
+    </div>
+    <div class="nav-item" onclick="showSection('buildings')">
+        <div class="icon">🏭</div>
+        <div class="label">Edificios</div>
+    </div>
 </div>
 
 <script>
-// =============================================
-// ===== VARIABLES GLOBALES =====
-// =============================================
-let allMissions = [];
-let allResources = [];
-let allBuildings = [];
-let islandSheets = {};
-let currentIslandFilter = 'all';
-let currentStatusFilter = 'all';
-let currentMissionPage = 1;
-const MISSIONS_PER_PAGE = 30;
-
-const ISLAND_MAP = {
-  'IC': { name: 'Isla de los Ancestros', emoji: '🏝️', color: '#2d5016' },
-  'FM': { name: 'Marble Fjord', emoji: '🗻', color: '#1a6dd4' },
-  'OM': { name: 'Mystery Shore', emoji: '🌊', color: '#7c3aed' },
-  'AA': { name: "Ancestors' Atoll", emoji: '🏖️', color: '#d97706' },
-  'IM': { name: 'Murlod Island', emoji: '🌋', color: '#dc2626' },
-  'CE': { name: 'Alien Shore', emoji: '👽', color: '#0d9488' },
-  'TM': { name: 'Piedmont Lands', emoji: '⛰️', color: '#b37400' },
-  'BH': { name: "Farmer's Bay", emoji: '🌾', color: '#7c3aed' },
-  'CB': { name: "Fisherman's Cove", emoji: '🐟', color: '#db2777' }
+// ==================== DATA ====================
+const ISLANDS = {
+    'IA': {name: 'Isla de los Ancestros', emoji: '🏝️'},
+    'MF': {name: 'Fiordo de Mármol', emoji: '🏔️'},
+    'MS': {name: 'Costa Misteriosa', emoji: '🌊'},
+    'AA': {name: 'Atolón de los Ancestros', emoji: '🐚'},
+    'MI': {name: 'Isla Murlod', emoji: '🌋'},
+    'AS': {name: 'Costa Alienígena', emoji: '👽'},
+    'PL': {name: 'Tierras de Piamonte', emoji: '⛰️'},
+    'FB': {name: 'Bahía del Granjero', emoji: '🌾'},
+    'CB': {name: 'Cala del Pescador', emoji: '🐟'}
 };
 
-// =============================================
-// ===== NAVEGACIÓN =====
-// =============================================
-function showPage(pageId) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('page-' + pageId).classList.add('active');
-  event.currentTarget.classList.add('active');
-  window.scrollTo(0, 0);
-}
+const RESOURCES_DB = {
+    basic: [
+        {en: 'Food', es: 'Comida'}, {en: 'Wood', es: 'Madera'}, {en: 'Stone', es: 'Piedra'},
+        {en: 'Lumber', es: 'Madera aserrada'}, {en: 'Cut Stone', es: 'Piedra cortada'},
+        {en: 'Marble', es: 'Mármol'}, {en: 'Sand', es: 'Arena'},
+        {en: 'Cut Marble', es: 'Mármol cortado'}, {en: 'Coral', es: 'Coral'},
+        {en: 'Glass', es: 'Cristal'}, {en: 'Copper', es: 'Cobre'}, {en: 'Paint', es: 'Pintura'}
+    ],
+    added: [
+        {en: 'Starclay', es: 'Arcilla estelar'}, {en: 'Fabric', es: 'Tela'},
+        {en: 'Wool', es: 'Lana'}, {en: 'Coal', es: 'Carbón'},
+        {en: 'Polunarium', es: 'Polunario'}, {en: 'Moon Graphite', es: 'Grafito lunar'},
+        {en: 'Lava Glass', es: 'Cristal de lava'}, {en: 'Sun Tile', es: 'Baldosa solar'},
+        {en: 'Frozen Rainbow', es: 'Arcoíris congelado'}, {en: 'Runestone', es: 'Piedra rúnica'},
+        {en: 'Nacre', es: 'Nácar'}, {en: 'Eternal Ice', es: 'Hielo eterno'},
+        {en: 'Jewel', es: 'Joya'}
+    ],
+    inventory: [
+        {en: "Dino's Egg", es: 'Huevo de dino'}, {en: 'Amber', es: 'Ámbar'},
+        {en: 'Ostrich Egg', es: 'Huevo de avestruz'}, {en: 'Trout', es: 'Trucha'},
+        {en: 'Juice', es: 'Zumo'}, {en: 'Silkworm', es: 'Gusano de seda'},
+        {en: 'Silk', es: 'Seda'}, {en: 'Milk', es: 'Leche'},
+        {en: 'Mystical Dust', es: 'Polvo místico'}, {en: 'Farming Kit', es: 'Kit de granja'},
+        {en: 'Fishing Kit', es: 'Kit de pesca'}, {en: 'Seeds', es: 'Semillas'},
+        {en: 'Dressing', es: 'Abono'}, {en: 'Badge', es: 'Insignia'},
+        {en: 'Rainbow Shaving', es: 'Virutas de arcoíris'},
+        {en: 'Crystalline Glass', es: 'Cristal cristalino'},
+        {en: 'Mercury', es: 'Mercurio'}, {en: 'Magnet', es: 'Imán'},
+        {en: 'Treble Clef', es: 'Clave de sol'}
+    ],
+    competition: [
+        {en: 'Ice Key', es: 'Llave de hielo'}, {en: 'Fire Key', es: 'Llave de fuego'},
+        {en: 'Flower Key', es: 'Llave de flores'}, {en: 'Sea Key', es: 'Llave del mar'},
+        {en: 'Snowflake', es: 'Copo de nieve'}, {en: 'Ice Sphere', es: 'Esfera de hielo'},
+        {en: 'Spark', es: 'Chispa'}, {en: 'Magma Ball', es: 'Bola de magma'},
+        {en: 'Clover', es: 'Trébol'}, {en: 'Rose', es: 'Rosa'},
+        {en: 'Starfish', es: 'Estrella de mar'}, {en: 'Seashell', es: 'Concha'}
+    ],
+    gold: [
+        {en: 'Gold', es: 'Oro'}, {en: 'Gems', es: 'Gemas'},
+        {en: 'Experience', es: 'Experiencia'}
+    ]
+};
 
-// =============================================
-// ===== TOAST =====
-// =============================================
-function showToast(message) {
-  const toast = document.getElementById('toast');
-  toast.textContent = message;
-  toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 3000);
-}
+const CATEGORY_NAMES = {
+    basic: '🪨 Recursos Básicos',
+    added: '✨ Recursos Añadidos',
+    inventory: '🎒 Recursos de Inventario',
+    competition: '🏆 Objetos de Competición',
+    gold: '💰 Monedas y Experiencia'
+};
 
-// =============================================
-// ===== CARGA DE EXCEL =====
-// =============================================
-document.getElementById('fileInput').addEventListener('change', function(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  showToast('⏳ Cargando Excel...');
-  const reader = new FileReader();
-  reader.onload = function(e) {
+// ==================== STATE ====================
+let state = {
+    missions: [],
+    inventoryQty: {},
+    buildings: []
+};
+
+function loadState() {
     try {
-      const data = new Uint8Array(e.target.result);
-      const workbook = XLSX.read(data, { type: 'array' });
-      processWorkbook(workbook);
-      showToast('✅ ¡Excel cargado correctamente!');
-    } catch (err) {
-      showToast('❌ Error al leer el archivo: ' + err.message);
-      console.error(err);
-    }
-  };
-  reader.readAsArrayBuffer(file);
-});
+        const saved = localStorage.getItem('tribez_tracker');
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            state.missions = parsed.missions || [];
+            state.inventoryQty = parsed.inventoryQty || {};
+            state.buildings = parsed.buildings || [];
+        }
+    } catch(e) { console.error('Error loading state', e); }
+}
 
-// Drag & Drop
-const uploadArea = document.getElementById('uploadArea');
-uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.classList.add('dragover'); });
-uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
-uploadArea.addEventListener('drop', (e) => {
-  e.preventDefault();
-  uploadArea.classList.remove('dragover');
-  const file = e.dataTransfer.files[0];
-  if (file && (file.name.endsWith('.xlsx') || file.name.endsWith('.xls'))) {
-    document.getElementById('fileInput').files = e.dataTransfer.files;
-    document.getElementById('fileInput').dispatchEvent(new Event('change'));
-  } else {
-    showToast('❌ Solo se aceptan archivos .xlsx');
-  }
-});
+function saveState() {
+    localStorage.setItem('tribez_tracker', JSON.stringify(state));
+}
 
-function processWorkbook(workbook) {
-  const sheets = workbook.SheetNames;
+// ==================== NAVIGATION ====================
+function showSection(id) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
 
-  if (sheets.includes('Todas')) {
-    const ws = workbook.Sheets['Todas'];
-    const json = XLSX.utils.sheet_to_json(ws, { defval: '' });
-    allMissions = json.map((row, i) => {
-      const keys = Object.keys(row);
-      return {
-        id: i,
-        name: row[keys[0]] || '',
-        col2: row[keys[1]] || '',
-        col3: row[keys[2]] || '',
-        col4: row[keys[3]] || '',
-        col5: row[keys[4]] || '',
-        island: row[keys[5]] || '',
-        status: (row[keys[6]] || row[keys[4]] || '').toString().toLowerCase()
-      };
+    document.getElementById(id).classList.add('active');
+
+    const tabs = document.querySelectorAll('.tab');
+    const navs = document.querySelectorAll('.nav-item');
+    const sections = ['dashboard','missions','inventory','needed','buildings','upload'];
+    const idx = sections.indexOf(id);
+    if (idx >= 0 && idx < tabs.length) tabs[idx].classList.add('active');
+    if (idx >= 0 && idx < navs.length) navs[idx].classList.add('active');
+
+    if (id === 'dashboard') updateDashboard();
+    if (id === 'inventory') renderInventory();
+    if (id === 'needed') renderNeeded();
+    if (id === 'missions') renderMissions();
+    if (id === 'buildings') renderBuildings();
+}
+
+// ==================== MISSIONS ====================
+function addMission() {
+    const name = document.getElementById('mission-name').value.trim();
+    if (!name) { alert('Escribe el nombre de la misión'); return; }
+
+    const mission = {
+        id: Date.now(),
+        name: name,
+        island: document.getElementById('mission-island').value,
+        requirements: document.getElementById('mission-req').value.trim(),
+        resources: parseResources(document.getElementById('mission-resources').value),
+        rewards: document.getElementById('mission-rewards').value.trim(),
+        status: 'active'
+    };
+
+    state.missions.push(mission);
+    saveState();
+
+    // Clear form
+    document.getElementById('mission-name').value = '';
+    document.getElementById('mission-req').value = '';
+    document.getElementById('mission-resources').value = '';
+    document.getElementById('mission-rewards').value = '';
+
+    renderMissions();
+    alert('✅ Misión añadida: ' + name);
+}
+
+function parseResources(str) {
+    if (!str) return {};
+    const resources = {};
+    str.split(',').forEach(part => {
+        const [name, qty] = part.split(':').map(s => s.trim());
+        if (name && qty) resources[name] = parseInt(qty) || 0;
     });
-    localStorage.setItem('tribez_missions', JSON.stringify(allMissions));
-  }
+    return resources;
+}
 
-  if (sheets.includes('Recursos')) {
-    const ws = workbook.Sheets['Recursos'];
-    const json = XLSX.utils.sheet_to_json(ws, { defval: '' });
-    allResources = json.map(row => {
-      const keys = Object.keys(row);
-      return { es: row[keys[0]] || '', en: row[keys[1]] || '' };
-    });
-    localStorage.setItem('tribez_resources', JSON.stringify(allResources));
-  }
-
-  if (sheets.includes('Industrias')) {
-    const ws = workbook.Sheets['Industrias'];
-    const json = XLSX.utils.sheet_to_json(ws, { defval: '', header: 1 });
-    allBuildings = json;
-    localStorage.setItem('tribez_buildings', JSON.stringify(allBuildings));
-  }
-
-  const islandCodes = ['IC', 'FM', 'OM', 'AA', 'IM', 'CE', 'TM', 'BH', 'CB'];
-  islandSheets = {};
-  islandCodes.forEach(code => {
-    if (sheets.includes(code)) {
-      const ws = workbook.Sheets[code];
-      const json = XLSX.utils.sheet_to_json(ws, { defval: '' });
-      islandSheets[code] = json;
+function changeMissionStatus(id, newStatus) {
+    const mission = state.missions.find(m => m.id === id);
+    if (mission) {
+        mission.status = newStatus;
+        saveState();
+        renderMissions();
     }
-  });
-  localStorage.setItem('tribez_islands', JSON.stringify(islandSheets));
-  localStorage.setItem('tribez_sheets', JSON.stringify(sheets));
-  localStorage.setItem('tribez_loaded', 'true');
-  localStorage.setItem('tribez_date', new Date().toLocaleDateString('es-ES'));
-
-  refreshAll();
 }
 
-// =============================================
-// ===== CARGAR DATOS GUARDADOS =====
-// =============================================
-function loadSavedData() {
-  if (localStorage.getItem('tribez_loaded') === 'true') {
-    try {
-      allMissions = JSON.parse(localStorage.getItem('tribez_missions') || '[]');
-      allResources = JSON.parse(localStorage.getItem('tribez_resources') || '[]');
-      allBuildings = JSON.parse(localStorage.getItem('tribez_buildings') || '[]');
-      islandSheets = JSON.parse(localStorage.getItem('tribez_islands') || '{}');
-      refreshAll();
-    } catch (e) { console.error('Error cargando datos:', e); }
-  }
-  loadInventory();
-  updateDataStatus();
-}
-
-// =============================================
-// ===== ACTUALIZAR UI =====
-// =============================================
-function refreshAll() {
-  updateDashboard();
-  renderMissions();
-  renderResources();
-  renderBuildings();
-  renderIslandFilters();
-  updateDataStatus();
-  renderInventoryAdvanced();
-}
-
-// =============================================
-// ===== DASHBOARD =====
-// =============================================
-function updateDashboard() {
-  const total = allMissions.length;
-  const done = allMissions.filter(m => m.status.includes('done') || m.status.includes('hech') || m.status.includes('complet')).length;
-  const progress = allMissions.filter(m => m.status.includes('progress') || m.status.includes('curso')).length;
-  const pending = total - done - progress;
-
-  document.getElementById('stat-total').textContent = total.toLocaleString('es-ES');
-  document.getElementById('stat-done').textContent = done.toLocaleString('es-ES');
-  document.getElementById('stat-progress').textContent = progress.toLocaleString('es-ES');
-  document.getElementById('stat-pending').textContent = pending.toLocaleString('es-ES');
-  document.getElementById('stat-done-pct').textContent = total > 0 ? (done / total * 100).toFixed(1) + '%' : '0%';
-  document.getElementById('stat-progress-pct').textContent = total > 0 ? (progress / total * 100).toFixed(1) + '%' : '0%';
-  document.getElementById('stat-pending-pct').textContent = total > 0 ? (pending / total * 100).toFixed(1) + '%' : '0%';
-  document.getElementById('stat-recursos').textContent = allResources.length;
-  document.getElementById('stat-edificios').textContent = allBuildings.length > 0 ? allBuildings.length : '0';
-
-  renderIslandProgress();
-}
-
-function renderIslandProgress() {
-  const container = document.getElementById('island-progress');
-  let html = '';
-  Object.keys(ISLAND_MAP).forEach(code => {
-    const island = ISLAND_MAP[code];
-    const islandMissions = islandSheets[code] || [];
-    const total = islandMissions.length;
-    let done = 0;
-    if (total > 0) {
-      islandMissions.forEach(m => {
-        const vals = Object.values(m).join(' ').toLowerCase();
-        if (vals.includes('done') || vals.includes('hech') || vals.includes('complet')) done++;
-      });
+function removeMission(id) {
+    if (confirm('¿Eliminar esta misión?')) {
+        state.missions = state.missions.filter(m => m.id !== id);
+        saveState();
+        renderMissions();
     }
-    const pct = total > 0 ? Math.round(done / total * 100) : 0;
-    html += `
-      <div class="progress-item" style="border-left:3px solid ${island.color}">
-        <div class="progress-header">
-          <span class="progress-label">${island.emoji} ${island.name} (${code})</span>
-          <span class="progress-pct">${total > 0 ? done + '/' + total + ' (' + pct + '%)' : 'Sin datos'}</span>
-        </div>
-        <div class="progress-bar">
-          <div class="progress-fill" style="width:${pct}%;background:linear-gradient(90deg,${island.color}66,${island.color})"></div>
-        </div>
-      </div>`;
-  });
-  container.innerHTML = html;
 }
 
-// =============================================
-// ===== MISIONES =====
-// =============================================
-function renderIslandFilters() {
-  const container = document.getElementById('island-filters');
-  let html = '<span class="chip active" data-island="all" onclick="filterByIsland(\'all\')">🌍 Todas</span>';
-  Object.keys(ISLAND_MAP).forEach(code => {
-    const island = ISLAND_MAP[code];
-    html += `<span class="chip" data-island="${code}" onclick="filterByIsland('${code}')">${island.emoji} ${code}</span>`;
-  });
-  container.innerHTML = html;
+let currentFilter = 'all';
+let currentSearch = '';
+
+function filterMissions(filter, btn) {
+    currentFilter = filter;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    renderMissions();
 }
 
-function filterByIsland(code) {
-  currentIslandFilter = code;
-  currentMissionPage = 1;
-  document.querySelectorAll('#island-filters .chip').forEach(c => {
-    c.classList.toggle('active', c.dataset.island === code);
-  });
-  renderMissions();
-}
-
-function filterByStatus(status) {
-  currentStatusFilter = status;
-  currentMissionPage = 1;
-  document.querySelectorAll('[data-status]').forEach(c => {
-    c.classList.toggle('active', c.dataset.status === status);
-  });
-  renderMissions();
-}
-
-function getFilteredMissions() {
-  let filtered = [...allMissions];
-  const search = document.getElementById('mission-search').value.toLowerCase();
-  if (search) {
-    filtered = filtered.filter(m =>
-      m.name.toLowerCase().includes(search) ||
-      m.col2.toLowerCase().includes(search) ||
-      m.col3.toLowerCase().includes(search)
-    );
-  }
-  if (currentIslandFilter !== 'all') {
-    filtered = filtered.filter(m =>
-      m.island.toUpperCase().includes(currentIslandFilter) ||
-      m.col2.toUpperCase().includes(currentIslandFilter)
-    );
-  }
-  if (currentStatusFilter === 'done') {
-    filtered = filtered.filter(m => m.status.includes('done') || m.status.includes('hech'));
-  } else if (currentStatusFilter === 'pending') {
-    filtered = filtered.filter(m => !m.status.includes('done') && !m.status.includes('hech') && !m.status.includes('progress') && !m.status.includes('curso'));
-  } else if (currentStatusFilter === 'progress') {
-    filtered = filtered.filter(m => m.status.includes('progress') || m.status.includes('curso'));
-  }
-  return filtered;
+function searchMissions(query) {
+    currentSearch = query.toLowerCase();
+    renderMissions();
 }
 
 function renderMissions() {
-  const container = document.getElementById('mission-list');
-  const filtered = getFilteredMissions();
-  const totalPages = Math.ceil(filtered.length / MISSIONS_PER_PAGE);
-  const start = (currentMissionPage - 1) * MISSIONS_PER_PAGE;
-  const pageMissions = filtered.slice(start, start + MISSIONS_PER_PAGE);
+    const list = document.getElementById('mission-list');
+    let missions = state.missions;
 
-  document.getElementById('mission-count').textContent =
-    `Mostrando ${Math.min(start + 1, filtered.length)}-${Math.min(start + MISSIONS_PER_PAGE, filtered.length)} de ${filtered.length} misiones`;
-
-  if (filtered.length === 0) {
-    container.innerHTML = '<div class="info-box">No se encontraron misiones con esos filtros.</div>';
-    document.getElementById('mission-pagination').innerHTML = '';
-    return;
-  }
-
-  let html = '';
-  pageMissions.forEach(m => {
-    const isDone = m.status.includes('done') || m.status.includes('hech');
-    const isProgress = m.status.includes('progress') || m.status.includes('curso');
-    const statusClass = isDone ? 'tag-done' : isProgress ? 'tag-progress' : 'tag-pending';
-    const statusText = isDone ? '✅ Hecha' : isProgress ? '🔄 En progreso' : '⏳ Pendiente';
-
-    html += `
-      <div class="mission-item" onclick="this.classList.toggle('expanded')">
-        <div class="mission-name">${m.name || 'Sin nombre'}</div>
-        <div class="mission-meta">
-          ${m.island ? `<span class="tag tag-isla">${m.island}</span>` : ''}
-          <span class="tag ${statusClass}">${statusText}</span>
-        </div>
-        <div class="mission-detail">
-          ${m.col2 ? `<strong>Col 2:</strong> ${m.col2}<br>` : ''}
-          ${m.col3 ? `<strong>Col 3:</strong> ${m.col3}<br>` : ''}
-          ${m.col4 ? `<strong>Col 4:</strong> ${m.col4}<br>` : ''}
-          ${m.col5 ? `<strong>Col 5:</strong> ${m.col5}` : ''}
-        </div>
-      </div>`;
-  });
-  container.innerHTML = html;
-
-  let pagHtml = '';
-  if (currentMissionPage > 1) {
-    pagHtml += `<button class="page-btn" onclick="goToMissionPage(${currentMissionPage - 1})">◀ Anterior</button>`;
-  }
-  pagHtml += `<span class="page-info">Página ${currentMissionPage} de ${totalPages}</span>`;
-  if (currentMissionPage < totalPages) {
-    pagHtml += `<button class="page-btn" onclick="goToMissionPage(${currentMissionPage + 1})">Siguiente ▶</button>`;
-  }
-  document.getElementById('mission-pagination').innerHTML = pagHtml;
-  document.getElementById('mission-info').style.display = allMissions.length > 0 ? 'none' : 'block';
-}
-
-function goToMissionPage(page) {
-  currentMissionPage = page;
-  renderMissions();
-  window.scrollTo(0, 0);
-}
-
-document.getElementById('mission-search').addEventListener('input', function() {
-  currentMissionPage = 1;
-  renderMissions();
-});
-
-// =============================================
-// ===== EDIFICIOS =====
-// =============================================
-function renderBuildings() {
-  const container = document.getElementById('building-list');
-  if (allBuildings.length === 0) { container.innerHTML = ''; return; }
-
-  const buildings = {};
-  const headers = allBuildings[0] || [];
-  for (let i = 1; i < allBuildings.length; i++) {
-    const row = allBuildings[i];
-    const name = row[0] || 'Sin nombre';
-    if (!buildings[name]) buildings[name] = { name, rows: [], headers };
-    buildings[name].rows.push(row);
-  }
-
-  let html = '';
-  Object.values(buildings).forEach(b => {
-    html += `
-      <div class="building-item" onclick="this.classList.toggle('expanded')">
-        <div class="building-header">
-          <span>🏗️ ${b.name}</span>
-          <span class="building-arrow">▶</span>
-        </div>
-        <div class="building-content">
-          <table class="data-table">
-            <tr>${b.headers.slice(1).map(h => `<th>${h}</th>`).join('')}</tr>
-            ${b.rows.map(r => `<tr>${r.slice(1).map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}
-          </table>
-        </div>
-      </div>`;
-  });
-  container.innerHTML = html;
-  document.getElementById('building-info').style.display = 'none';
-}
-
-document.getElementById('building-search').addEventListener('input', function() {
-  const search = this.value.toLowerCase();
-  document.querySelectorAll('.building-item').forEach(item => {
-    const name = item.querySelector('.building-header span').textContent.toLowerCase();
-    item.style.display = name.includes(search) ? 'block' : 'none';
-  });
-});
-
-// =============================================
-// ===== RECURSOS =====
-// =============================================
-function renderResources() {
-  const container = document.getElementById('resource-list');
-  if (allResources.length === 0) { container.innerHTML = ''; return; }
-
-  const emojis = {
-    'oro': '🪙', 'comida': '🍖', 'madera': '🪵', 'piedra': '🪨', 'ambar': '🔶',
-    'coral': '🪸', 'gema': '💎', 'joya': '💍', 'concha': '🐚', 'vidrio': '🪟',
-    'pintura': '🎨', 'tela': '🧵', 'seda': '🧵', 'lana': '🐑', 'semillas': '🌱',
-    'leche': '🥛', 'antorcha': '🔥', 'rosa': '🌹', 'tulipan': '🌷', 'trebol': '🍀',
-    'trucha': '🐟', 'camarones': '🦐', 'cangrejo': '🦀', 'pulpo': '🐙',
-    'cobre': '🟤', 'carbon': '⬛', 'arena': '🏖️', 'marmol': '⬜', 'huevo': '🥚',
-    'hielo': '🧊', 'nieve': '❄️', 'fuego': '🔥', 'estrella': '⭐', 'llave': '🔑',
-    'flor': '🌸', 'violeta': '💜', 'narciso': '🌼'
-  };
-
-  function getEmoji(name) {
-    const lower = name.toLowerCase();
-    for (const [key, emoji] of Object.entries(emojis)) {
-      if (lower.includes(key)) return emoji;
+    if (currentFilter !== 'all') {
+        missions = missions.filter(m => m.status === currentFilter);
     }
-    return '📦';
-  }
+    if (currentSearch) {
+        missions = missions.filter(m =>
+            m.name.toLowerCase().includes(currentSearch) ||
+            m.requirements.toLowerCase().includes(currentSearch) ||
+            (ISLANDS[m.island]?.name || '').toLowerCase().includes(currentSearch)
+        );
+    }
 
-  let html = '';
-  allResources.forEach(r => {
-    html += `
-      <div class="resource-item">
-        <div class="resource-name">${getEmoji(r.es)} ${r.es}</div>
-        <div class="resource-eng">${r.en}</div>
-      </div>`;
-  });
-  container.innerHTML = html;
-  document.getElementById('resource-info').style.display = 'none';
+    if (missions.length === 0) {
+        list.innerHTML = '<div class="empty-state"><div class="icon">📋</div><p>No hay misiones. Usa el formulario de arriba para añadir.</p></div>';
+        return;
+    }
+
+    list.innerHTML = missions.map(m => {
+        const island = ISLANDS[m.island] || {name: m.island, emoji: '🏝️'};
+        const statusClass = m.status === 'active' ? 'active' : m.status === 'done' ? 'done' : 'pending';
+        const resourcesText = Object.entries(m.resources || {}).map(([k,v]) => k + ': ' + v).join(', ');
+
+        return '<div class="mission-item ' + statusClass + '">' +
+            '<div class="mission-header">' +
+                '<span class="mission-title">' + m.name + '</span>' +
+                '<span class="mission-island">' + island.emoji + ' ' + m.island + '</span>' +
+            '</div>' +
+            (m.requirements ? '<div class="mission-req">📝 ' + m.requirements + '</div>' : '') +
+            (resourcesText ? '<div class="mission-req">💎 Recursos: ' + resourcesText + '</div>' : '') +
+            (m.rewards ? '<div class="mission-reward">🎁 ' + m.rewards + '</div>' : '') +
+            '<div class="mission-status-btn">' +
+                (m.status !== 'active' ? '<button class="status-btn btn-active" onclick="changeMissionStatus(' + m.id + ',\'active\')">⚡ Activa</button>' : '') +
+                (m.status !== 'done' ? '<button class="status-btn btn-done" onclick="changeMissionStatus(' + m.id + ',\'done\')">✅ Hecha</button>' : '') +
+                (m.status !== 'pending' ? '<button class="status-btn btn-pending" onclick="changeMissionStatus(' + m.id + ',\'pending\')">⏳ Pendiente</button>' : '') +
+                '<button class="status-btn btn-remove" onclick="removeMission(' + m.id + ')">🗑️</button>' +
+            '</div>' +
+        '</div>';
+    }).join('');
 }
 
-document.getElementById('resource-search').addEventListener('input', function() {
-  const search = this.value.toLowerCase();
-  document.querySelectorAll('.resource-item').forEach(item => {
-    const name = item.querySelector('.resource-name').textContent.toLowerCase();
-    const eng = item.querySelector('.resource-eng').textContent.toLowerCase();
-    item.style.display = (name.includes(search) || eng.includes(search)) ? 'flex' : 'none';
-  });
-});
+// ==================== INVENTORY ====================
+function renderInventory(searchQuery) {
+    const list = document.getElementById('inventory-list');
+    let html = '';
 
-// =============================================
-// ===== INVENTARIO =====
-// =============================================
-function updateInv(resource, delta) {
-  const input = document.getElementById('inv-' + resource);
-  let val = parseInt(input.value) || 0;
-  val = Math.max(0, val + delta);
-  input.value = val;
-  saveInventory();
+    for (const [catKey, catResources] of Object.entries(RESOURCES_DB)) {
+        let filtered = catResources;
+        if (searchQuery) {
+            filtered = catResources.filter(r =>
+                r.es.toLowerCase().includes(searchQuery) ||
+                r.en.toLowerCase().includes(searchQuery)
+            );
+        }
+        if (filtered.length === 0) continue;
+
+        html += '<div class="resource-category">';
+        html += '<div class="category-header">' + CATEGORY_NAMES[catKey] + ' (' + filtered.length + ')</div>';
+
+        filtered.forEach(r => {
+            const qty = state.inventoryQty[r.en] || 0;
+            html += '<div class="resource-item">' +
+                '<div class="resource-name">' + r.es + ' <small>(' + r.en + ')</small></div>' +
+                '<div class="resource-qty">' +
+                    '<button class="qty-btn qty-minus" onclick="changeQty(\'' + r.en.replace(/'/g, "\\'") + '\', -1)">−</button>' +
+                    '<input type="number" class="qty-input" value="' + qty + '" min="0" ' +
+                        'onchange="setQty(\'' + r.en.replace(/'/g, "\\'") + '\', this.value)">' +
+                    '<button class="qty-btn qty-plus" onclick="changeQty(\'' + r.en.replace(/'/g, "\\'") + '\', 1)">+</button>' +
+                '</div>' +
+            '</div>';
+        });
+
+        html += '</div>';
+    }
+
+    list.innerHTML = html;
 }
 
-function saveInventory() {
-  const inv = {};
-  document.querySelectorAll('.inv-input').forEach(input => {
-    inv[input.id] = parseInt(input.value) || 0;
-  });
-  localStorage.setItem('tribez_inventory', JSON.stringify(inv));
+function searchResources(query) {
+    renderInventory(query.toLowerCase());
 }
 
-function loadInventory() {
-  try {
-    const inv = JSON.parse(localStorage.getItem('tribez_inventory') || '{}');
-    Object.keys(inv).forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.value = inv[id];
+function changeQty(resourceEn, delta) {
+    const current = state.inventoryQty[resourceEn] || 0;
+    const newVal = Math.max(0, current + delta);
+    state.inventoryQty[resourceEn] = newVal;
+    saveState();
+    renderInventory();
+}
+
+function setQty(resourceEn, val) {
+    state.inventoryQty[resourceEn] = Math.max(0, parseInt(val) || 0);
+    saveState();
+}
+
+// ==================== NEEDED RESOURCES ====================
+function renderNeeded() {
+    const activeMissions = state.missions.filter(m => m.status === 'active');
+    const neededList = document.getElementById('needed-list');
+    const summaryText = document.getElementById('need-summary-text');
+
+    if (activeMissions.length === 0) {
+        summaryText.textContent = 'No tienes misiones activas. Añade misiones para ver qué recursos necesitas.';
+        neededList.innerHTML = '<div class="empty-state"><div class="icon">🔍</div><p>Añade misiones activas primero</p></div>';
+        return;
+    }
+
+    // Aggregate needed resources from all active missions
+    const totalNeeded = {};
+    activeMissions.forEach(m => {
+        for (const [res, qty] of Object.entries(m.resources || {})) {
+            totalNeeded[res] = (totalNeeded[res] || 0) + qty;
+        }
     });
-  } catch (e) {}
+
+    if (Object.keys(totalNeeded).length === 0) {
+        summaryText.textContent = activeMissions.length + ' misiones activas, pero ninguna tiene recursos especificados. Edita las misiones para añadir recursos (ej: Wood:50, Stone:30).';
+        neededList.innerHTML = '';
+        return;
+    }
+
+    let missingCount = 0;
+    let html = '';
+
+    // Group by mission
+    html += '<div class="section-title">📋 Por Misión Activa</div>';
+    activeMissions.forEach(m => {
+        if (Object.keys(m.resources || {}).length === 0) return;
+        const island = ISLANDS[m.island] || {emoji: '🏝️'};
+        html += '<div class="card"><h3>' + island.emoji + ' ' + m.name + '</h3>';
+
+        for (const [res, need] of Object.entries(m.resources)) {
+            const have = state.inventoryQty[res] || 0;
+            const diff = have - need;
+            const ok = diff >= 0;
+            if (!ok) missingCount++;
+
+            // Find Spanish name
+            let esName = res;
+            for (const cat of Object.values(RESOURCES_DB)) {
+                const found = cat.find(r => r.en.toLowerCase() === res.toLowerCase());
+                if (found) { esName = found.es; break; }
+            }
+
+            html += '<div class="needed-item ' + (ok ? 'needed-ok' : 'needed-missing') + '">' +
+                '<div class="needed-name">' + esName + ' <small>(' + res + ')</small></div>' +
+                '<div class="needed-values">' +
+                    '<span class="need">Necesitas: ' + need + '</span> | ' +
+                    '<span class="have">Tienes: ' + have + '</span>' +
+                    (ok ? ' ✅' : ' | <span class="missing">Faltan: ' + Math.abs(diff) + '</span>') +
+                '</div>' +
+            '</div>';
+        }
+        html += '</div>';
+    });
+
+    // Total summary
+    html += '<div class="section-title">📊 Resumen Total</div>';
+    for (const [res, need] of Object.entries(totalNeeded)) {
+        const have = state.inventoryQty[res] || 0;
+        const diff = have - need;
+        const ok = diff >= 0;
+
+        let esName = res;
+        for (const cat of Object.values(RESOURCES_DB)) {
+            const found = cat.find(r => r.en.toLowerCase() === res.toLowerCase());
+            if (found) { esName = found.es; break; }
+        }
+
+        html += '<div class="needed-item ' + (ok ? 'needed-ok' : 'needed-missing') + '">' +
+            '<div class="needed-name">' + esName + '</div>' +
+            '<div class="needed-values">' +
+                '<span class="need">Total: ' + need + '</span> | ' +
+                '<span class="have">Tienes: ' + have + '</span>' +
+                (ok ? ' ✅' : ' | <span class="missing">Faltan: ' + Math.abs(diff) + '</span>') +
+            '</div>' +
+        '</div>';
+    }
+
+    summaryText.textContent = activeMissions.length + ' misiones activas | ' +
+        Object.keys(totalNeeded).length + ' recursos necesarios | ' +
+        missingCount + ' te faltan';
+
+    neededList.innerHTML = html;
 }
 
-function renderInventoryAdvanced() {
-  const container = document.getElementById('inv-advanced');
-  if (allResources.length === 0) {
-    container.innerHTML = '<div class="info-box">Carga tu Excel para ver todos los recursos aquí.</div>';
-    return;
-  }
-  const basics = ['oro', 'comida', 'madera', 'piedra'];
-  const inv = JSON.parse(localStorage.getItem('tribez_inventory') || '{}');
-  let html = '<div class="stats-grid">';
-  allResources.forEach(r => {
-    const key = 'inv-' + r.es.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-    if (basics.some(b => r.es.toLowerCase().includes(b))) return;
-    const val = inv[key] || 0;
-    html += `
-      <div class="card" style="padding:10px;">
-        <div class="card-title" style="font-size:10px;">${r.es}</div>
-        <div class="counter">
-          <button class="counter-btn" onclick="updateInvAdv('${key}',-1)" style="width:24px;height:24px;font-size:14px;">-</button>
-          <input class="inv-input" id="${key}" type="number" value="${val}" onchange="saveInventory()" style="width:50px;font-size:12px;">
-          <button class="counter-btn" onclick="updateInvAdv('${key}',1)" style="width:24px;height:24px;font-size:14px;">+</button>
-        </div>
-      </div>`;
-  });
-  html += '</div>';
-  container.innerHTML = html;
+// ==================== BUILDINGS ====================
+function renderBuildings(searchQuery) {
+    const list = document.getElementById('building-list');
+
+    if (state.buildings.length === 0) {
+        list.innerHTML = '<div class="empty-state"><div class="icon">🏭</div>' +
+            '<p>No hay edificios cargados.<br>Sube tu Excel en la pestaña 📤 Cargar<br>o añádelos manualmente.</p></div>';
+        return;
+    }
+
+    let buildings = state.buildings;
+    if (searchQuery) {
+        buildings = buildings.filter(b =>
+            (b.name || '').toLowerCase().includes(searchQuery)
+        );
+    }
+
+    // Group by building name
+    const grouped = {};
+    buildings.forEach(b => {
+        if (!grouped[b.name]) grouped[b.name] = [];
+        grouped[b.name].push(b);
+    });
+
+    let html = '';
+    for (const [name, deals] of Object.entries(grouped)) {
+        html += '<div class="card"><h3>🏭 ' + name + '</h3>';
+        deals.forEach(d => {
+            html += '<div style="font-size:0.75em; padding:4px 0; border-bottom:1px solid #f0f0f0;">' +
+                '<strong>Nv.' + (d.level || '?') + '</strong> ' + (d.type || '') + ' → ' +
+                (d.produces || 'Sin datos') +
+            '</div>';
+        });
+        html += '</div>';
+    }
+
+    list.innerHTML = html;
 }
 
-function updateInvAdv(id, delta) {
-  const input = document.getElementById(id);
-  if (!input) return;
-  let val = parseInt(input.value) || 0;
-  val = Math.max(0, val + delta);
-  input.value = val;
-  saveInventory();
+function searchBuildings(query) {
+    renderBuildings(query.toLowerCase());
 }
 
-// =============================================
-// ===== ESTADO DE DATOS =====
-// =============================================
-function updateDataStatus() {
-  const container = document.getElementById('data-status');
-  const loaded = localStorage.getItem('tribez_loaded') === 'true';
-  const date = localStorage.getItem('tribez_date') || '';
-  const sheets = JSON.parse(localStorage.getItem('tribez_sheets') || '[]');
+// ==================== DASHBOARD ====================
+function updateDashboard() {
+    const active = state.missions.filter(m => m.status === 'active');
+    const done = state.missions.filter(m => m.status === 'done');
+    const total = state.missions.length;
 
-  if (!loaded) {
-    container.innerHTML = '<div class="status-row"><div class="status-badge status-empty">⚠️ No hay datos cargados</div></div>';
-    return;
-  }
+    document.getElementById('stat-active').textContent = active.length;
+    document.getElementById('stat-done').textContent = done.length;
+    document.getElementById('stat-total').textContent = total;
 
-  let html = `<div class="info-box">📅 Última carga: <strong>${date}</strong></div><div class="status-row" style="flex-wrap:wrap;">`;
-  const expectedSheets = ['Todas', 'Recursos', 'Industrias', 'IC', 'FM', 'OM', 'AA', 'IM', 'CE', 'TM', 'BH', 'CB'];
-  expectedSheets.forEach(s => {
-    const found = sheets.includes(s);
-    html += `<div class="status-badge ${found ? 'status-loaded' : 'status-empty'}">${found ? '✅' : '❌'} ${s}</div>`;
-  });
-  html += '</div>';
-  container.innerHTML = html;
+    // Count missing resources
+    let missingCount = 0;
+    active.forEach(m => {
+        for (const [res, need] of Object.entries(m.resources || {})) {
+            if ((state.inventoryQty[res] || 0) < need) missingCount++;
+        }
+    });
+    document.getElementById('stat-missing').textContent = missingCount;
+
+    // Progress
+    const pct = total > 0 ? Math.round((done.length / total) * 100) : 0;
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('progress-text').textContent = pct + '% (' + done.length + '/' + total + ')';
+
+    // Active missions on dashboard
+    const activeList = document.getElementById('dashboard-active-list');
+    if (active.length === 0) {
+        activeList.innerHTML = '<div class="empty-state"><p>No hay misiones activas</p></div>';
+    } else {
+        activeList.innerHTML = active.map(m => {
+            const island = ISLANDS[m.island] || {emoji: '🏝️', name: m.island};
+            return '<div style="padding:8px 0; border-bottom:1px solid #f0f0f0; font-size:0.8em;">' +
+                '<strong>' + island.emoji + ' ' + m.name + '</strong>' +
+                (m.requirements ? '<br><span style="color:#666;">' + m.requirements + '</span>' : '') +
+            '</div>';
+        }).join('');
+    }
+
+    // Island progress
+    const islandProgress = document.getElementById('island-progress');
+    let ipHtml = '';
+    for (const [code, info] of Object.entries(ISLANDS)) {
+        const islandMissions = state.missions.filter(m => m.island === code);
+        const islandDone = islandMissions.filter(m => m.status === 'done').length;
+        const islandTotal = islandMissions.length;
+        const islandPct = islandTotal > 0 ? Math.round((islandDone / islandTotal) * 100) : 0;
+
+        ipHtml += '<div class="island-row">' +
+            '<div class="island-name">' + info.emoji + ' ' + info.name + '</div>' +
+            '<div class="island-bar"><div class="island-fill" style="width:' + islandPct + '%"></div></div>' +
+            '<div class="island-pct">' + islandPct + '%</div>' +
+        '</div>';
+    }
+    islandProgress.innerHTML = ipHtml;
 }
 
-// =============================================
-// ===== BORRAR DATOS =====
-// =============================================
-function clearAllData() {
-  if (confirm('¿Estás seguro? Se borrarán todos los datos guardados.')) {
-    localStorage.removeItem('tribez_missions');
-    localStorage.removeItem('tribez_resources');
-    localStorage.removeItem('tribez_buildings');
-    localStorage.removeItem('tribez_islands');
-    localStorage.removeItem('tribez_sheets');
-    localStorage.removeItem('tribez_loaded');
-    localStorage.removeItem('tribez_date');
-    localStorage.removeItem('tribez_inventory');
-    allMissions = []; allResources = []; allBuildings = []; islandSheets = {};
-    refreshAll();
-    showToast('🗑️ Datos borrados correctamente');
-  }
+// ==================== FILE UPLOAD ====================
+function handleFileUpload(input) {
+    const file = input.files[0];
+    if (!file) return;
+
+    alert('📁 Archivo seleccionado: ' + file.name + '\n\nNota: Para procesar Excel necesitas la librería SheetJS.\nAñade esta línea en el <head> del HTML:\n<script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"><\/script>\n\nO puedes importar los datos manualmente.');
 }
 
-// =============================================
-// ===== SERVICE WORKER =====
-// =============================================
+function exportData() {
+    const dataStr = JSON.stringify(state, null, 2);
+    const blob = new Blob([dataStr], {type: 'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'tribez_tracker_backup.json';
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+// ==================== INIT ====================
+loadState();
+updateDashboard();
+renderMissions();
+renderInventory();
+renderBuildings();
+
+// Register Service Worker
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').catch(err => console.log('SW error:', err));
+    navigator.serviceWorker.register('sw.js').catch(function(){});
 }
-
-// =============================================
-// ===== INICIALIZACIÓN =====
-// =============================================
-document.addEventListener('DOMContentLoaded', function() {
-  loadSavedData();
-  renderIslandFilters();
-});
 </script>
 
 </body>
