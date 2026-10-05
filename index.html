@@ -1,0 +1,1093 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#2d5016">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.json">
+<title>The Tribez Tracker</title>
+
+<!-- SheetJS para leer Excel -->
+<script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+
+<style>
+/* ===== RESET & BASE ===== */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: system-ui, -apple-system, sans-serif;
+  background: #1a1a2e;
+  color: #e0e0e0;
+  min-height: 100vh;
+  overflow-x: hidden;
+  padding-bottom: 70px;
+}
+
+/* ===== HEADER ===== */
+.header {
+  background: linear-gradient(135deg, #2d5016 0%, #4a7c23 50%, #2d5016 100%);
+  padding: 14px 20px;
+  text-align: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+}
+.header h1 { font-size: 20px; color: #fff; letter-spacing: 1px; }
+.header .subtitle { font-size: 11px; color: #b8d4a0; margin-top: 2px; }
+
+/* ===== BOTTOM NAV ===== */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #16213e;
+  border-top: 2px solid #0f3460;
+  display: flex;
+  z-index: 100;
+  padding: 4px 0;
+}
+.nav-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 4px;
+  font-size: 10px;
+  color: #7a8ba0;
+  cursor: pointer;
+  border: none;
+  background: none;
+  transition: color 0.2s;
+}
+.nav-btn.active { color: #4ade80; }
+.nav-btn:hover { color: #b8d4a0; }
+.nav-btn span { font-size: 20px; margin-bottom: 2px; }
+
+/* ===== PAGES ===== */
+.page { display: none; padding: 16px; animation: fadeIn 0.3s ease; }
+.page.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+/* ===== CARDS ===== */
+.card {
+  background: #16213e;
+  border: 1px solid #0f3460;
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 10px;
+}
+.card-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #7a8ba0; margin-bottom: 6px; }
+.card-value { font-size: 28px; font-weight: 700; font-family: 'Courier New', monospace; color: #4ade80; }
+.card-sub { font-size: 11px; color: #7a8ba0; margin-top: 2px; }
+
+/* ===== STATS GRID ===== */
+.stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 14px; }
+
+/* ===== PROGRESS BARS ===== */
+.progress-item {
+  background: #16213e;
+  border: 1px solid #0f3460;
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+}
+.progress-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.progress-label { font-size: 13px; font-weight: 600; color: #e0e0e0; }
+.progress-pct { font-size: 13px; font-weight: 700; color: #4ade80; font-family: monospace; }
+.progress-bar { height: 8px; background: #0a0a1a; border-radius: 4px; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, #2d5016, #4ade80); transition: width 0.8s ease; }
+
+/* ===== SEARCH ===== */
+.search-box { position: relative; margin-bottom: 14px; }
+.search-box input {
+  width: 100%; padding: 12px 16px 12px 42px;
+  background: #16213e; border: 2px solid #0f3460; border-radius: 12px;
+  color: #e0e0e0; font-size: 14px; outline: none;
+}
+.search-box input:focus { border-color: #4ade80; }
+.search-box input::placeholder { color: #4a5568; }
+.search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 16px; }
+
+/* ===== FILTER CHIPS ===== */
+.filter-row { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 10px; scrollbar-width: none; }
+.filter-row::-webkit-scrollbar { display: none; }
+.chip {
+  flex-shrink: 0; padding: 7px 12px; background: #0f3460; border: 1px solid #1a4a7a;
+  border-radius: 20px; font-size: 12px; font-weight: 500; color: #7a8ba0; cursor: pointer;
+}
+.chip.active { background: #14532d; color: #4ade80; border-color: #4ade80; }
+.chip:hover { background: #1a4a7a; color: #b8d4a0; }
+
+/* ===== MISSION ITEMS ===== */
+.mission-item {
+  background: #16213e; border: 1px solid #0f3460; border-radius: 10px;
+  padding: 12px; margin-bottom: 8px; cursor: pointer; transition: all 0.15s;
+}
+.mission-item:hover { border-color: #4ade80; }
+.mission-name { font-size: 14px; font-weight: 600; color: #e0e0e0; margin-bottom: 4px; }
+.mission-meta { display: flex; flex-wrap: wrap; gap: 6px; font-size: 11px; }
+.mission-detail { margin-top: 8px; font-size: 12px; color: #a0aec0; line-height: 1.5; display: none; border-top: 1px solid #0f3460; padding-top: 8px; }
+.mission-item.expanded .mission-detail { display: block; }
+.tag { padding: 3px 8px; border-radius: 6px; font-weight: 500; }
+.tag-isla { background: #0f3460; color: #60a5fa; }
+.tag-done { background: #14532d; color: #4ade80; }
+.tag-pending { background: #713f12; color: #fbbf24; }
+.tag-progress { background: #1e3a5f; color: #38bdf8; }
+
+/* ===== STATUS SELECT ===== */
+.status-select {
+  padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 600;
+  border: none; cursor: pointer; outline: none;
+}
+.status-done { background: #14532d; color: #4ade80; }
+.status-pending { background: #713f12; color: #fbbf24; }
+.status-progress { background: #1e3a5f; color: #38bdf8; }
+
+/* ===== TABLES ===== */
+.data-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; }
+.data-table th {
+  text-align: left; color: #7a8ba0; font-weight: 600; padding: 8px 10px;
+  border-bottom: 2px solid #0f3460; font-size: 11px; text-transform: uppercase;
+}
+.data-table td { padding: 8px 10px; color: #c0c8d4; border-bottom: 1px solid #0a1628; }
+.data-table tr:hover td { background: #1a2744; }
+
+/* ===== RESOURCE GRID ===== */
+.resource-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
+.resource-item {
+  background: #16213e; border: 1px solid #0f3460; border-radius: 8px;
+  padding: 10px; text-align: center; transition: all 0.15s;
+}
+.resource-item:hover { border-color: #4ade80; }
+.resource-name { font-size: 12px; font-weight: 600; color: #e0e0e0; }
+.resource-eng { font-size: 10px; color: #7a8ba0; margin-top: 2px; }
+
+/* ===== INVENTORY INPUT ===== */
+.inv-input {
+  width: 70px; padding: 4px 8px; background: #0a0a1a; border: 1px solid #0f3460;
+  border-radius: 6px; color: #4ade80; font-size: 14px; font-family: monospace;
+  text-align: center; outline: none;
+}
+.inv-input:focus { border-color: #4ade80; }
+
+/* ===== UPLOAD AREA ===== */
+.upload-area {
+  border: 3px dashed #0f3460; border-radius: 16px; padding: 40px 20px;
+  text-align: center; cursor: pointer; background: #0d1b36; transition: all 0.3s;
+}
+.upload-area:hover, .upload-area.dragover { border-color: #4ade80; background: #112240; }
+.upload-icon { font-size: 48px; margin-bottom: 12px; }
+.upload-text { font-size: 16px; font-weight: 600; color: #e0e0e0; }
+.upload-sub { font-size: 13px; color: #7a8ba0; margin-top: 8px; }
+
+/* ===== STATUS BADGES ===== */
+.status-row { display: flex; gap: 6px; margin-top: 12px; flex-wrap: wrap; }
+.status-badge {
+  display: flex; align-items: center; gap: 5px; padding: 5px 10px;
+  border-radius: 8px; font-size: 11px; font-weight: 600;
+}
+.status-loaded { background: #14532d; color: #4ade80; }
+.status-empty { background: #3b1a1a; color: #f87171; }
+
+/* ===== INFO BOX ===== */
+.info-box {
+  background: #112240; border-left: 4px solid #4ade80; border-radius: 0 8px 8px 0;
+  padding: 12px 14px; margin-bottom: 14px; font-size: 13px; color: #a0aec0; line-height: 1.5;
+}
+
+/* ===== SECTION TITLE ===== */
+.section-title { font-size: 17px; font-weight: 700; color: #e0e0e0; margin-bottom: 14px; }
+
+/* ===== BUILDING ITEM ===== */
+.building-item {
+  background: #16213e; border: 1px solid #0f3460; border-radius: 10px;
+  margin-bottom: 8px; overflow: hidden;
+}
+.building-header {
+  padding: 12px 14px; cursor: pointer; font-weight: 600; font-size: 14px;
+  color: #e0e0e0; display: flex; justify-content: space-between; align-items: center;
+}
+.building-header:hover { background: #1a2744; }
+.building-content { display: none; padding: 0 14px 12px; }
+.building-item.expanded .building-content { display: block; }
+.building-arrow { font-size: 10px; color: #4a5568; transition: transform 0.2s; }
+.building-item.expanded .building-arrow { transform: rotate(90deg); }
+
+/* ===== COUNTER ===== */
+.counter { display: flex; align-items: center; gap: 4px; }
+.counter-btn {
+  width: 28px; height: 28px; border-radius: 6px; border: 1px solid #0f3460;
+  background: #0a0a1a; color: #4ade80; font-size: 16px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.counter-btn:hover { background: #14532d; }
+
+/* ===== PAGINATION ===== */
+.pagination { display: flex; justify-content: center; gap: 8px; margin-top: 14px; }
+.page-btn {
+  padding: 8px 14px; background: #0f3460; border: 1px solid #1a4a7a;
+  border-radius: 8px; color: #7a8ba0; cursor: pointer; font-size: 12px;
+}
+.page-btn.active { background: #14532d; color: #4ade80; border-color: #4ade80; }
+.page-btn:hover { background: #1a4a7a; }
+.page-info { color: #7a8ba0; font-size: 12px; padding: 8px; }
+
+/* ===== TOAST ===== */
+.toast {
+  position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+  background: #14532d; color: #4ade80; padding: 12px 24px; border-radius: 10px;
+  font-size: 14px; font-weight: 600; z-index: 200; opacity: 0; transition: opacity 0.3s;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+}
+.toast.show { opacity: 1; }
+
+/* ===== HIDDEN FILE INPUT ===== */
+#fileInput { display: none; }
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #1a1a2e; }
+::-webkit-scrollbar-thumb { background: #0f3460; border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<div class="header">
+  <h1>🏝️ The Tribez Tracker</h1>
+  <div class="subtitle">Tu guía personal de misiones, recursos y edificios</div>
+</div>
+
+<!-- ===== TOAST NOTIFICATION ===== -->
+<div class="toast" id="toast"></div>
+
+<!-- ===== HIDDEN FILE INPUT ===== -->
+<input type="file" id="fileInput" accept=".xlsx,.xls">
+
+<!-- ========================================= -->
+<!-- ===== PAGE 1: DASHBOARD ===== -->
+<!-- ========================================= -->
+<div class="page active" id="page-dashboard">
+  <div class="section-title">📊 Panel de Progreso</div>
+  <div class="stats-grid" id="dashboard-stats">
+    <div class="card">
+      <div class="card-title">Misiones Totales</div>
+      <div class="card-value" id="stat-total">0</div>
+      <div class="card-sub">En tu tracker</div>
+    </div>
+    <div class="card">
+      <div class="card-title">✅ Completadas</div>
+      <div class="card-value" id="stat-done" style="color:#4ade80">0</div>
+      <div class="card-sub" id="stat-done-pct">0%</div>
+    </div>
+    <div class="card">
+      <div class="card-title">🔄 En Progreso</div>
+      <div class="card-value" id="stat-progress" style="color:#38bdf8">0</div>
+      <div class="card-sub" id="stat-progress-pct">0%</div>
+    </div>
+    <div class="card">
+      <div class="card-title">⏳ Pendientes</div>
+      <div class="card-value" id="stat-pending" style="color:#fbbf24">0</div>
+      <div class="card-sub" id="stat-pending-pct">0%</div>
+    </div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="card">
+      <div class="card-title">💎 Recursos</div>
+      <div class="card-value" id="stat-recursos">0</div>
+      <div class="card-sub">Catalogados</div>
+    </div>
+    <div class="card">
+      <div class="card-title">🏗️ Edificios</div>
+      <div class="card-value" id="stat-edificios">0</div>
+      <div class="card-sub">Industrias</div>
+    </div>
+  </div>
+
+  <div class="section-title">🏝️ Progreso por Isla</div>
+  <div id="island-progress"></div>
+</div>
+
+<!-- ========================================= -->
+<!-- ===== PAGE 2: MISIONES ===== -->
+<!-- ========================================= -->
+<div class="page" id="page-misiones">
+  <div class="section-title">📜 Buscador de Misiones</div>
+  <div class="search-box">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="mission-search" placeholder="Buscar misión por nombre...">
+  </div>
+  <div class="filter-row" id="island-filters"></div>
+  <div class="filter-row">
+    <span class="chip active" data-status="all" onclick="filterByStatus('all')">Todas</span>
+    <span class="chip" data-status="done" onclick="filterByStatus('done')">✅ Hechas</span>
+    <span class="chip" data-status="pending" onclick="filterByStatus('pending')">⏳ Pendientes</span>
+    <span class="chip" data-status="progress" onclick="filterByStatus('progress')">🔄 En progreso</span>
+  </div>
+  <div id="mission-count" style="font-size:12px;color:#7a8ba0;margin-bottom:10px;"></div>
+  <div id="mission-list"></div>
+  <div class="pagination" id="mission-pagination"></div>
+  <div class="info-box" style="margin-top:14px;" id="mission-info">
+    📌 Carga tu Excel en la pestaña "📤 Cargar" para ver todas las misiones.
+  </div>
+</div>
+
+<!-- ========================================= -->
+<!-- ===== PAGE 3: EDIFICIOS ===== -->
+<!-- ========================================= -->
+<div class="page" id="page-edificios">
+  <div class="section-title">🏗️ Edificios e Industrias</div>
+  <div class="search-box">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="building-search" placeholder="Buscar edificio...">
+  </div>
+  <div id="building-list"></div>
+  <div class="info-box" style="margin-top:14px;" id="building-info">
+    📌 Carga tu Excel para ver todos los edificios con datos de tu hoja "Industrias".
+  </div>
+</div>
+
+<!-- ========================================= -->
+<!-- ===== PAGE 4: RECURSOS ===== -->
+<!-- ========================================= -->
+<div class="page" id="page-recursos">
+  <div class="section-title">💎 Catálogo de Recursos</div>
+  <div class="search-box">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="resource-search" placeholder="Buscar recurso en español o inglés...">
+  </div>
+  <div class="resource-grid" id="resource-list"></div>
+  <div class="info-box" style="margin-top:14px;" id="resource-info">
+    📌 Carga tu Excel para ver los 87 recursos de tu hoja "Recursos".
+  </div>
+</div>
+
+<!-- ========================================= -->
+<!-- ===== PAGE 5: INVENTARIO ===== -->
+<!-- ========================================= -->
+<div class="page" id="page-inventario">
+  <div class="section-title">📦 Mi Inventario</div>
+  <div class="info-box">
+    Lleva el control de tus recursos. Los cambios se guardan automáticamente.
+  </div>
+  <div class="section-title" style="font-size:15px;">💰 Recursos Básicos</div>
+  <div class="stats-grid" id="inv-basics">
+    <div class="card">
+      <div class="card-title">🪙 Oro</div>
+      <div class="counter">
+        <button class="counter-btn" onclick="updateInv('oro',-100)">-</button>
+        <input class="inv-input" id="inv-oro" type="number" value="0" onchange="saveInventory()">
+        <button class="counter-btn" onclick="updateInv('oro',100)">+</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">🍖 Comida</div>
+      <div class="counter">
+        <button class="counter-btn" onclick="updateInv('comida',-10)">-</button>
+        <input class="inv-input" id="inv-comida" type="number" value="0" onchange="saveInventory()">
+        <button class="counter-btn" onclick="updateInv('comida',10)">+</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">🪵 Madera</div>
+      <div class="counter">
+        <button class="counter-btn" onclick="updateInv('madera',-10)">-</button>
+        <input class="inv-input" id="inv-madera" type="number" value="0" onchange="saveInventory()">
+        <button class="counter-btn" onclick="updateInv('madera',10)">+</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">🪨 Piedra</div>
+      <div class="counter">
+        <button class="counter-btn" onclick="updateInv('piedra',-10)">-</button>
+        <input class="inv-input" id="inv-piedra" type="number" value="0" onchange="saveInventory()">
+        <button class="counter-btn" onclick="updateInv('piedra',10)">+</button>
+      </div>
+    </div>
+  </div>
+  <div class="section-title" style="font-size:15px;">💎 Recursos Avanzados</div>
+  <div id="inv-advanced"></div>
+  <div class="section-title" style="font-size:15px; margin-top:14px;">🏠 Mis Edificios</div>
+  <div id="inv-buildings"></div>
+</div>
+
+<!-- ========================================= -->
+<!-- ===== PAGE 6: CARGAR EXCEL ===== -->
+<!-- ========================================= -->
+<div class="page" id="page-cargar">
+  <div class="section-title">📤 Cargar tu Excel</div>
+  <div class="info-box">
+    Sube tu archivo <strong>"misiones the tribez.xlsx"</strong>. Los datos se guardan en el navegador — no necesitas volver a cargarlo cada vez.
+  </div>
+
+  <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+    <div class="upload-icon">📁</div>
+    <div class="upload-text">Toca aquí para seleccionar tu Excel</div>
+    <div class="upload-sub">Formato: .xlsx</div>
+  </div>
+
+  <div class="section-title" style="font-size:15px; margin-top:20px;">📋 Estado de los Datos</div>
+  <div id="data-status"></div>
+
+  <div style="margin-top:20px;">
+    <button onclick="clearAllData()" style="width:100%;padding:12px;background:#3b1a1a;color:#f87171;border:2px solid #7f1d1d;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;">
+      🗑️ Borrar todos los datos guardados
+    </button>
+  </div>
+
+  <div class="info-box" style="margin-top:14px;">
+    💡 <strong>Tip:</strong> Si actualizas tu Excel, simplemente vuelve a cargarlo aquí y los datos se reemplazarán.
+  </div>
+</div>
+
+<!-- ===== BOTTOM NAVIGATION ===== -->
+<div class="bottom-nav">
+  <button class="nav-btn active" onclick="showPage('dashboard')">
+    <span>📊</span>Dashboard
+  </button>
+  <button class="nav-btn" onclick="showPage('misiones')">
+    <span>📜</span>Misiones
+  </button>
+  <button class="nav-btn" onclick="showPage('edificios')">
+    <span>🏗️</span>Edificios
+  </button>
+  <button class="nav-btn" onclick="showPage('recursos')">
+    <span>💎</span>Recursos
+  </button>
+  <button class="nav-btn" onclick="showPage('inventario')">
+    <span>📦</span>Inventario
+  </button>
+  <button class="nav-btn" onclick="showPage('cargar')">
+    <span>📤</span>Cargar
+  </button>
+</div>
+
+<script>
+// =============================================
+// ===== VARIABLES GLOBALES =====
+// =============================================
+let allMissions = [];
+let allResources = [];
+let allBuildings = [];
+let islandSheets = {};
+let currentIslandFilter = 'all';
+let currentStatusFilter = 'all';
+let currentMissionPage = 1;
+const MISSIONS_PER_PAGE = 30;
+
+// Mapa de islas
+const ISLAND_MAP = {
+  'IC': { name: 'Isla de los Ancestros', emoji: '🏝️', color: '#4ade80' },
+  'FM': { name: 'Marble Fjord', emoji: '🗻', color: '#60a5fa' },
+  'OM': { name: 'Mystery Shore', emoji: '🌊', color: '#c084fc' },
+  'AA': { name: "Ancestors' Atoll", emoji: '🏖️', color: '#fb923c' },
+  'IM': { name: 'Murlod Island', emoji: '🌋', color: '#f87171' },
+  'CE': { name: 'Alien Shore', emoji: '👽', color: '#2dd4bf' },
+  'TM': { name: 'Piedmont Lands', emoji: '⛰️', color: '#fbbf24' },
+  'BH': { name: "Farmer's Bay", emoji: '🌾', color: '#a78bfa' },
+  'CB': { name: "Fisherman's Cove", emoji: '🐟', color: '#f472b6' }
+};
+
+// =============================================
+// ===== NAVEGACIÓN =====
+// =============================================
+function showPage(pageId) {
+  // Ocultar todas las páginas
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+
+  // Mostrar la seleccionada
+  document.getElementById('page-' + pageId).classList.add('active');
+  event.currentTarget.classList.add('active');
+
+  // Scroll arriba
+  window.scrollTo(0, 0);
+}
+
+// =============================================
+// ===== TOAST NOTIFICATIONS =====
+// =============================================
+function showToast(message) {
+  const toast = document.getElementById('toast');
+  toast.textContent = message;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+// =============================================
+// ===== CARGA DE EXCEL =====
+// =============================================
+document.getElementById('fileInput').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  showToast('⏳ Cargando Excel...');
+  const reader = new FileReader();
+
+  reader.onload = function(e) {
+    try {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, { type: 'array' });
+
+      // Procesar cada hoja
+      processWorkbook(workbook);
+
+      showToast('✅ ¡Excel cargado correctamente!');
+    } catch (err) {
+      showToast('❌ Error al leer el archivo: ' + err.message);
+      console.error(err);
+    }
+  };
+
+  reader.readAsArrayBuffer(file);
+});
+
+// Drag & Drop
+const uploadArea = document.getElementById('uploadArea');
+uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.classList.add('dragover'); });
+uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
+uploadArea.addEventListener('drop', (e) => {
+  e.preventDefault();
+  uploadArea.classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file && (file.name.endsWith('.xlsx') || file.name.endsWith('.xls'))) {
+    document.getElementById('fileInput').files = e.dataTransfer.files;
+    document.getElementById('fileInput').dispatchEvent(new Event('change'));
+  } else {
+    showToast('❌ Solo se aceptan archivos .xlsx');
+  }
+});
+
+function processWorkbook(workbook) {
+  const sheets = workbook.SheetNames;
+
+  // 1. Procesar hoja "Todas" (misiones principales)
+  if (sheets.includes('Todas')) {
+    const ws = workbook.Sheets['Todas'];
+    const json = XLSX.utils.sheet_to_json(ws, { defval: '' });
+    allMissions = json.map((row, i) => ({
+      id: i,
+      name: row[Object.keys(row)[0]] || '',
+      col2: row[Object.keys(row)[1]] || '',
+      col3: row[Object.keys(row)[2]] || '',
+      col4: row[Object.keys(row)[3]] || '',
+      col5: row[Object.keys(row)[4]] || '',
+      island: row[Object.keys(row)[5]] || '',
+      status: (row[Object.keys(row)[6]] || row[Object.keys(row)[4]] || '').toString().toLowerCase()
+    }));
+    localStorage.setItem('tribez_missions', JSON.stringify(allMissions));
+  }
+
+  // 2. Procesar hoja "Recursos"
+  if (sheets.includes('Recursos')) {
+    const ws = workbook.Sheets['Recursos'];
+    const json = XLSX.utils.sheet_to_json(ws, { defval: '' });
+    allResources = json.map(row => ({
+      es: row[Object.keys(row)[0]] || '',
+      en: row[Object.keys(row)[1]] || ''
+    }));
+    localStorage.setItem('tribez_resources', JSON.stringify(allResources));
+  }
+
+  // 3. Procesar hoja "Industrias"
+  if (sheets.includes('Industrias')) {
+    const ws = workbook.Sheets['Industrias'];
+    const json = XLSX.utils.sheet_to_json(ws, { defval: '', header: 1 });
+    allBuildings = json;
+    localStorage.setItem('tribez_buildings', JSON.stringify(allBuildings));
+  }
+
+  // 4. Procesar hojas por isla
+  const islandCodes = ['IC', 'FM', 'OM', 'AA', 'IM', 'CE', 'TM', 'BH', 'CB'];
+  islandSheets = {};
+  islandCodes.forEach(code => {
+    if (sheets.includes(code)) {
+      const ws = workbook.Sheets[code];
+      const json = XLSX.utils.sheet_to_json(ws, { defval: '' });
+      islandSheets[code] = json;
+    }
+  });
+  localStorage.setItem('tribez_islands', JSON.stringify(islandSheets));
+
+  // Guardar lista de hojas cargadas
+  localStorage.setItem('tribez_sheets', JSON.stringify(sheets));
+  localStorage.setItem('tribez_loaded', 'true');
+  localStorage.setItem('tribez_date', new Date().toLocaleDateString('es-ES'));
+
+  // Actualizar toda la UI
+  refreshAll();
+}
+
+// =============================================
+// ===== CARGAR DATOS GUARDADOS =====
+// =============================================
+function loadSavedData() {
+  if (localStorage.getItem('tribez_loaded') === 'true') {
+    try {
+      allMissions = JSON.parse(localStorage.getItem('tribez_missions') || '[]');
+      allResources = JSON.parse(localStorage.getItem('tribez_resources') || '[]');
+      allBuildings = JSON.parse(localStorage.getItem('tribez_buildings') || '[]');
+      islandSheets = JSON.parse(localStorage.getItem('tribez_islands') || '{}');
+      refreshAll();
+    } catch (e) {
+      console.error('Error cargando datos guardados:', e);
+    }
+  }
+  loadInventory();
+  updateDataStatus();
+}
+
+// =============================================
+// ===== ACTUALIZAR TODA LA UI =====
+// =============================================
+function refreshAll() {
+  updateDashboard();
+  renderMissions();
+  renderResources();
+  renderBuildings();
+  renderIslandFilters();
+  updateDataStatus();
+  renderInventoryAdvanced();
+}
+
+// =============================================
+// ===== DASHBOARD =====
+// =============================================
+function updateDashboard() {
+  const total = allMissions.length;
+  const done = allMissions.filter(m => m.status.includes('done') || m.status.includes('hech') || m.status.includes('complet')).length;
+  const progress = allMissions.filter(m => m.status.includes('progress') || m.status.includes('curso')).length;
+  const pending = total - done - progress;
+
+  document.getElementById('stat-total').textContent = total.toLocaleString('es-ES');
+  document.getElementById('stat-done').textContent = done.toLocaleString('es-ES');
+  document.getElementById('stat-progress').textContent = progress.toLocaleString('es-ES');
+  document.getElementById('stat-pending').textContent = pending.toLocaleString('es-ES');
+
+  document.getElementById('stat-done-pct').textContent = total > 0 ? (done / total * 100).toFixed(1) + '%' : '0%';
+  document.getElementById('stat-progress-pct').textContent = total > 0 ? (progress / total * 100).toFixed(1) + '%' : '0%';
+  document.getElementById('stat-pending-pct').textContent = total > 0 ? (pending / total * 100).toFixed(1) + '%' : '0%';
+
+  document.getElementById('stat-recursos').textContent = allResources.length;
+  document.getElementById('stat-edificios').textContent = allBuildings.length > 0 ? allBuildings.length : '0';
+
+  // Progreso por isla
+  renderIslandProgress();
+}
+
+function renderIslandProgress() {
+  const container = document.getElementById('island-progress');
+  let html = '';
+
+  Object.keys(ISLAND_MAP).forEach(code => {
+    const island = ISLAND_MAP[code];
+    const islandMissions = islandSheets[code] || [];
+    const total = islandMissions.length;
+
+    // Intentar contar las completadas
+    let done = 0;
+    if (total > 0) {
+      islandMissions.forEach(m => {
+        const vals = Object.values(m).join(' ').toLowerCase();
+        if (vals.includes('done') || vals.includes('hech') || vals.includes('complet')) done++;
+      });
+    }
+
+    const pct = total > 0 ? Math.round(done / total * 100) : 0;
+
+    html += `
+      <div class="progress-item" style="border-left:3px solid ${island.color}">
+        <div class="progress-header">
+          <span class="progress-label">${island.emoji} ${island.name} (${code})</span>
+          <span class="progress-pct">${total > 0 ? done + '/' + total + ' (' + pct + '%)' : 'Sin datos'}</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width:${pct}%;background:linear-gradient(90deg,${island.color}44,${island.color})"></div>
+        </div>
+      </div>`;
+  });
+
+  container.innerHTML = html;
+}
+
+// =============================================
+// ===== MISIONES =====
+// =============================================
+function renderIslandFilters() {
+  const container = document.getElementById('island-filters');
+  let html = '<span class="chip active" data-island="all" onclick="filterByIsland(\'all\')">🌍 Todas</span>';
+
+  Object.keys(ISLAND_MAP).forEach(code => {
+    const island = ISLAND_MAP[code];
+    html += `<span class="chip" data-island="${code}" onclick="filterByIsland('${code}')">${island.emoji} ${code}</span>`;
+  });
+
+  container.innerHTML = html;
+}
+
+function filterByIsland(code) {
+  currentIslandFilter = code;
+  currentMissionPage = 1;
+  document.querySelectorAll('#island-filters .chip').forEach(c => {
+    c.classList.toggle('active', c.dataset.island === code);
+  });
+  renderMissions();
+}
+
+function filterByStatus(status) {
+  currentStatusFilter = status;
+  currentMissionPage = 1;
+  document.querySelectorAll('[data-status]').forEach(c => {
+    c.classList.toggle('active', c.dataset.status === status);
+  });
+  renderMissions();
+}
+
+function getFilteredMissions() {
+  let filtered = [...allMissions];
+  const search = document.getElementById('mission-search').value.toLowerCase();
+
+  // Filtro de búsqueda
+  if (search) {
+    filtered = filtered.filter(m =>
+      m.name.toLowerCase().includes(search) ||
+      m.col2.toLowerCase().includes(search) ||
+      m.col3.toLowerCase().includes(search)
+    );
+  }
+
+  // Filtro de isla
+  if (currentIslandFilter !== 'all') {
+    filtered = filtered.filter(m =>
+      m.island.toUpperCase().includes(currentIslandFilter) ||
+      m.col2.toUpperCase().includes(currentIslandFilter)
+    );
+  }
+
+  // Filtro de estado
+  if (currentStatusFilter === 'done') {
+    filtered = filtered.filter(m => m.status.includes('done') || m.status.includes('hech'));
+  } else if (currentStatusFilter === 'pending') {
+    filtered = filtered.filter(m => !m.status.includes('done') && !m.status.includes('hech') && !m.status.includes('progress') && !m.status.includes('curso'));
+  } else if (currentStatusFilter === 'progress') {
+    filtered = filtered.filter(m => m.status.includes('progress') || m.status.includes('curso'));
+  }
+
+  return filtered;
+}
+
+function renderMissions() {
+  const container = document.getElementById('mission-list');
+  const filtered = getFilteredMissions();
+  const totalPages = Math.ceil(filtered.length / MISSIONS_PER_PAGE);
+  const start = (currentMissionPage - 1) * MISSIONS_PER_PAGE;
+  const pageMissions = filtered.slice(start, start + MISSIONS_PER_PAGE);
+
+  document.getElementById('mission-count').textContent =
+    `Mostrando ${Math.min(start + 1, filtered.length)}-${Math.min(start + MISSIONS_PER_PAGE, filtered.length)} de ${filtered.length} misiones`;
+
+  if (filtered.length === 0) {
+    container.innerHTML = '<div class="info-box">No se encontraron misiones con esos filtros.</div>';
+    document.getElementById('mission-pagination').innerHTML = '';
+    return;
+  }
+
+  let html = '';
+  pageMissions.forEach(m => {
+    const isDone = m.status.includes('done') || m.status.includes('hech');
+    const isProgress = m.status.includes('progress') || m.status.includes('curso');
+    const statusClass = isDone ? 'tag-done' : isProgress ? 'tag-progress' : 'tag-pending';
+    const statusText = isDone ? '✅ Hecha' : isProgress ? '🔄 En progreso' : '⏳ Pendiente';
+
+    html += `
+      <div class="mission-item" onclick="this.classList.toggle('expanded')">
+        <div class="mission-name">${m.name || 'Sin nombre'}</div>
+        <div class="mission-meta">
+          ${m.island ? `<span class="tag tag-isla">${m.island}</span>` : ''}
+          <span class="tag ${statusClass}">${statusText}</span>
+        </div>
+        <div class="mission-detail">
+          ${m.col2 ? `<strong>Col 2:</strong> ${m.col2}<br>` : ''}
+          ${m.col3 ? `<strong>Col 3:</strong> ${m.col3}<br>` : ''}
+          ${m.col4 ? `<strong>Col 4:</strong> ${m.col4}<br>` : ''}
+          ${m.col5 ? `<strong>Col 5:</strong> ${m.col5}` : ''}
+        </div>
+      </div>`;
+  });
+
+  container.innerHTML = html;
+
+  // Paginación
+  let pagHtml = '';
+  if (currentMissionPage > 1) {
+    pagHtml += `<button class="page-btn" onclick="goToMissionPage(${currentMissionPage - 1})">◀ Anterior</button>`;
+  }
+  pagHtml += `<span class="page-info">Página ${currentMissionPage} de ${totalPages}</span>`;
+  if (currentMissionPage < totalPages) {
+    pagHtml += `<button class="page-btn" onclick="goToMissionPage(${currentMissionPage + 1})">Siguiente ▶</button>`;
+  }
+  document.getElementById('mission-pagination').innerHTML = pagHtml;
+
+  // Ocultar info si hay datos
+  document.getElementById('mission-info').style.display = allMissions.length > 0 ? 'none' : 'block';
+}
+
+function goToMissionPage(page) {
+  currentMissionPage = page;
+  renderMissions();
+  window.scrollTo(0, 0);
+}
+
+// Búsqueda en tiempo real
+document.getElementById('mission-search').addEventListener('input', function() {
+  currentMissionPage = 1;
+  renderMissions();
+});
+
+// =============================================
+// ===== EDIFICIOS =====
+// =============================================
+function renderBuildings() {
+  const container = document.getElementById('building-list');
+  if (allBuildings.length === 0) {
+    container.innerHTML = '';
+    return;
+  }
+
+  // Agrupar por edificio (primera columna)
+  const buildings = {};
+  const headers = allBuildings[0] || [];
+
+  for (let i = 1; i < allBuildings.length; i++) {
+    const row = allBuildings[i];
+    const name = row[0] || 'Sin nombre';
+    if (!buildings[name]) buildings[name] = { name, rows: [], headers };
+    buildings[name].rows.push(row);
+  }
+
+  let html = '';
+  Object.values(buildings).forEach(b => {
+    html += `
+      <div class="building-item" onclick="this.classList.toggle('expanded')">
+        <div class="building-header">
+          <span>🏗️ ${b.name}</span>
+          <span class="building-arrow">▶</span>
+        </div>
+        <div class="building-content">
+          <table class="data-table">
+            <tr>${b.headers.slice(1).map(h => `<th>${h}</th>`).join('')}</tr>
+            ${b.rows.map(r => `<tr>${r.slice(1).map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}
+          </table>
+        </div>
+      </div>`;
+  });
+
+  container.innerHTML = html;
+  document.getElementById('building-info').style.display = 'none';
+}
+
+// Búsqueda de edificios
+document.getElementById('building-search').addEventListener('input', function() {
+  const search = this.value.toLowerCase();
+  document.querySelectorAll('.building-item').forEach(item => {
+    const name = item.querySelector('.building-header span').textContent.toLowerCase();
+    item.style.display = name.includes(search) ? 'block' : 'none';
+  });
+});
+
+// =============================================
+// ===== RECURSOS =====
+// =============================================
+function renderResources() {
+  const container = document.getElementById('resource-list');
+  if (allResources.length === 0) {
+    container.innerHTML = '';
+    return;
+  }
+
+  const emojis = {
+    'oro': '🪙', 'comida': '🍖', 'madera': '🪵', 'piedra': '🪨', 'ambar': '🔶',
+    'coral': '🪸', 'gema': '💎', 'joya': '💍', 'concha': '🐚', 'vidrio': '🪟',
+    'pintura': '🎨', 'tela': '🧵', 'seda': '🧵', 'lana': '🐑', 'semillas': '🌱',
+    'leche': '🥛', 'antorcha': '🔥', 'rosa': '🌹', 'tulipan': '🌷', 'trebol': '🍀',
+    'trucha': '🐟', 'camarones': '🦐', 'cangrejo': '🦀', 'pulpo': '🐙',
+    'cobre': '🟤', 'carbon': '⬛', 'arena': '🏖️', 'marmol': '⬜', 'huevo': '🥚',
+    'hielo': '🧊', 'nieve': '❄️', 'fuego': '🔥', 'estrella': '⭐', 'llave': '🔑',
+    'dino': '🦕', 'flor': '🌸', 'violeta': '💜', 'narciso': '🌼'
+  };
+
+  function getEmoji(name) {
+    const lower = name.toLowerCase();
+    for (const [key, emoji] of Object.entries(emojis)) {
+      if (lower.includes(key)) return emoji;
+    }
+    return '📦';
+  }
+
+  let html = '';
+  allResources.forEach(r => {
+    html += `
+      <div class="resource-item">
+        <div class="resource-name">${getEmoji(r.es)} ${r.es}</div>
+        <div class="resource-eng">${r.en}</div>
+      </div>`;
+  });
+
+  container.innerHTML = html;
+  document.getElementById('resource-info').style.display = 'none';
+}
+
+// Búsqueda de recursos
+document.getElementById('resource-search').addEventListener('input', function() {
+  const search = this.value.toLowerCase();
+  document.querySelectorAll('.resource-item').forEach(item => {
+    const name = item.querySelector('.resource-name').textContent.toLowerCase();
+    const eng = item.querySelector('.resource-eng').textContent.toLowerCase();
+    item.style.display = (name.includes(search) || eng.includes(search)) ? 'flex' : 'none';
+  });
+});
+
+// =============================================
+// ===== INVENTARIO =====
+// =============================================
+function updateInv(resource, delta) {
+  const input = document.getElementById('inv-' + resource);
+  let val = parseInt(input.value) || 0;
+  val = Math.max(0, val + delta);
+  input.value = val;
+  saveInventory();
+}
+
+function saveInventory() {
+  const inv = {};
+  document.querySelectorAll('.inv-input').forEach(input => {
+    inv[input.id] = parseInt(input.value) || 0;
+  });
+  localStorage.setItem('tribez_inventory', JSON.stringify(inv));
+}
+
+function loadInventory() {
+  try {
+    const inv = JSON.parse(localStorage.getItem('tribez_inventory') || '{}');
+    Object.keys(inv).forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = inv[id];
+    });
+  } catch (e) {}
+}
+
+function renderInventoryAdvanced() {
+  const container = document.getElementById('inv-advanced');
+  if (allResources.length === 0) {
+    container.innerHTML = '<div class="info-box">Carga tu Excel para ver todos los recursos aquí.</div>';
+    return;
+  }
+
+  const basics = ['oro', 'comida', 'madera', 'piedra'];
+  const inv = JSON.parse(localStorage.getItem('tribez_inventory') || '{}');
+
+  let html = '<div class="stats-grid">';
+  allResources.forEach(r => {
+    const key = 'inv-' + r.es.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    if (basics.some(b => r.es.toLowerCase().includes(b))) return;
+
+    const val = inv[key] || 0;
+    html += `
+      <div class="card" style="padding:10px;">
+        <div class="card-title" style="font-size:10px;">${r.es}</div>
+        <div class="counter">
+          <button class="counter-btn" onclick="updateInvAdv('${key}',-1)" style="width:24px;height:24px;font-size:14px;">-</button>
+          <input class="inv-input" id="${key}" type="number" value="${val}" onchange="saveInventory()" style="width:50px;font-size:12px;">
+          <button class="counter-btn" onclick="updateInvAdv('${key}',1)" style="width:24px;height:24px;font-size:14px;">+</button>
+        </div>
+      </div>`;
+  });
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+function updateInvAdv(id, delta) {
+  const input = document.getElementById(id);
+  if (!input) return;
+  let val = parseInt(input.value) || 0;
+  val = Math.max(0, val + delta);
+  input.value = val;
+  saveInventory();
+}
+
+// =============================================
+// ===== ESTADO DE DATOS =====
+// =============================================
+function updateDataStatus() {
+  const container = document.getElementById('data-status');
+  const loaded = localStorage.getItem('tribez_loaded') === 'true';
+  const date = localStorage.getItem('tribez_date') || '';
+  const sheets = JSON.parse(localStorage.getItem('tribez_sheets') || '[]');
+
+  if (!loaded) {
+    container.innerHTML = '<div class="status-row"><div class="status-badge status-empty">⚠️ No hay datos cargados</div></div>';
+    return;
+  }
+
+  let html = `<div class="info-box">📅 Última carga: <strong>${date}</strong></div><div class="status-row">`;
+
+  const expectedSheets = ['Todas', 'Recursos', 'Industrias', 'IC', 'FM', 'OM', 'AA', 'IM', 'CE', 'TM', 'BH', 'CB'];
+  expectedSheets.forEach(s => {
+    const found = sheets.includes(s);
+    html += `<div class="status-badge ${found ? 'status-loaded' : 'status-empty'}">
+      ${found ? '✅' : '❌'} ${s}
+    </div>`;
+  });
+
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+// =============================================
+// ===== BORRAR DATOS =====
+// =============================================
+function clearAllData() {
+  if (confirm('¿Estás seguro? Se borrarán todos los datos guardados.')) {
+    localStorage.removeItem('tribez_missions');
+    localStorage.removeItem('tribez_resources');
+    localStorage.removeItem('tribez_buildings');
+    localStorage.removeItem('tribez_islands');
+    localStorage.removeItem('tribez_sheets');
+    localStorage.removeItem('tribez_loaded');
+    localStorage.removeItem('tribez_date');
+    localStorage.removeItem('tribez_inventory');
+
+    allMissions = [];
+    allResources = [];
+    allBuildings = [];
+    islandSheets = {};
+
+    refreshAll();
+    showToast('🗑️ Datos borrados correctamente');
+  }
+}
+
+// =============================================
+// ===== SERVICE WORKER =====
+// =============================================
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(err => console.log('SW error:', err));
+}
+
+// =============================================
+// ===== INICIALIZACIÓN =====
+// =============================================
+document.addEventListener('DOMContentLoaded', function() {
+  loadSavedData();
+  renderIslandFilters();
+});
+</script>
+
+</body>
+</html>
+
